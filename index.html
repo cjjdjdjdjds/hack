@@ -1,0 +1,1557 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER_TERMINAL // v2.4.0 [SECURE SIMULATOR]</title>
+    <style>
+        /* RESET & BASE STYLES */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #030712;
+            color: #00ff66;
+            font-family: 'Courier New', Courier, monospace, monospace;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* CRT SCANLINE & FLICKER EFFECTS */
+        body::before {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 99999;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        body::after {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: rgba(18, 16, 16, 0.1);
+            opacity: 0;
+            z-index: 99998;
+            pointer-events: none;
+            animation: flicker 0.15s infinite;
+        }
+
+        @keyframes flicker {
+            0% { opacity: 0.027; }
+            50% { opacity: 0.01; }
+            100% { opacity: 0.035; }
+        }
+
+        /* LAYOUT & NAVIGATION */
+        header {
+            background: #050b14;
+            border-bottom: 2px solid #00ff66;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.2);
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(0, 255, 102, 0.6);
+            letter-spacing: 2px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+        }
+
+        .tab-btn {
+            background: #0a1424;
+            color: #00ff66;
+            border: 1px solid #00ff66;
+            padding: 6px 14px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            font-size: 0.9rem;
+            border-radius: 3px;
+            transition: all 0.2s ease;
+            box-shadow: inset 0 0 5px rgba(0, 255, 102, 0.2);
+        }
+
+        .tab-btn:hover, .tab-btn.active {
+            background: #00ff66;
+            color: #030712;
+            box-shadow: 0 0 10px #00ff66;
+        }
+
+        .user-stats-bar {
+            font-size: 0.85rem;
+            color: #00e5ff;
+            text-shadow: 0 0 5px rgba(0, 229, 255, 0.5);
+        }
+
+        /* MAIN APP CONTAINER */
+        .app-container {
+            flex: 1;
+            display: flex;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .view-panel {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #030712;
+            display: none;
+            flex-direction: column;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .view-panel.active {
+            display: flex;
+        }
+
+        /* DISCLAIMER MODAL */
+        #disclaimer-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(3, 7, 18, 0.95);
+            z-index: 100000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: #060e1e;
+            border: 2px solid #ff3333;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            border-radius: 6px;
+            box-shadow: 0 0 25px rgba(255, 51, 51, 0.4);
+            text-align: center;
+        }
+
+        .modal-content h2 {
+            color: #ff3333;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px rgba(255, 51, 51, 0.6);
+        }
+
+        .modal-content p {
+            color: #a0aec0;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+
+        .modal-btn {
+            background: #ff3333;
+            color: #fff;
+            border: none;
+            padding: 10px 25px;
+            font-family: inherit;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(255, 51, 51, 0.5);
+            transition: 0.2s;
+        }
+
+        .modal-btn:hover {
+            background: #ff0000;
+            box-shadow: 0 0 15px #ff0000;
+        }
+
+        /* TERMINAL VIEW STYLING */
+        #terminal-view {
+            padding: 0;
+            background: #030712;
+        }
+
+        .terminal-output {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .terminal-line {
+            margin-bottom: 6px;
+        }
+
+        .t-error { color: #ff3333; text-shadow: 0 0 5px rgba(255, 51, 51, 0.4); }
+        .t-success { color: #00ff66; text-shadow: 0 0 5px rgba(0, 255, 102, 0.4); }
+        .t-info { color: #00e5ff; text-shadow: 0 0 5px rgba(0, 229, 255, 0.4); }
+        .t-warning { color: #ffaa00; text-shadow: 0 0 5px rgba(255, 170, 0, 0.4); }
+        .t-dim { color: #4a5568; }
+
+        .terminal-input-bar {
+            display: flex;
+            background: #050b14;
+            border-top: 1px solid #1a365d;
+            padding: 12px 20px;
+            align-items: center;
+        }
+
+        .terminal-prompt {
+            color: #00ff66;
+            font-weight: bold;
+            margin-right: 10px;
+            text-shadow: 0 0 5px rgba(0, 255, 102, 0.4);
+            white-space: nowrap;
+        }
+
+        .terminal-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #00ff66;
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+            text-shadow: 0 0 5px rgba(0, 255, 102, 0.4);
+        }
+
+        /* LESSONS VIEW STYLING */
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #00e5ff;
+            text-shadow: 0 0 8px rgba(0, 229, 255, 0.5);
+            border-bottom: 1px solid #1a365d;
+            padding-bottom: 10px;
+        }
+
+        .lessons-grid, .missions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            padding-bottom: 30px;
+        }
+
+        .card {
+            background: #060e1e;
+            border: 1px solid #1a365d;
+            border-radius: 6px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.2s;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .card:hover {
+            border-color: #00e5ff;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
+        }
+
+        .card h3 {
+            color: #00ff66;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .card p {
+            color: #a0aec0;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .card-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #ffaa00;
+            margin-bottom: 15px;
+        }
+
+        .action-btn {
+            background: #0a1424;
+            color: #00e5ff;
+            border: 1px solid #00e5ff;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            border-radius: 4px;
+            text-align: center;
+            transition: 0.2s;
+        }
+
+        .action-btn:hover {
+            background: #00e5ff;
+            color: #030712;
+            box-shadow: 0 0 10px #00e5ff;
+        }
+
+        .action-btn.completed {
+            background: #062615;
+            color: #00ff66;
+            border-color: #00ff66;
+        }
+
+        /* LESSON READER MODAL */
+        #lesson-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(3, 7, 18, 0.9);
+            z-index: 10000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .lesson-reader {
+            background: #060e1e;
+            border: 2px solid #00e5ff;
+            width: 100%;
+            max-width: 800px;
+            max-height: 85vh;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 25px rgba(0, 229, 255, 0.3);
+            overflow: hidden;
+        }
+
+        .lesson-header {
+            background: #0a1424;
+            padding: 15px 20px;
+            border-bottom: 1px solid #00e5ff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .lesson-body {
+            padding: 20px;
+            overflow-y: auto;
+            color: #cbd5e0;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .lesson-body h4 {
+            color: #00ff66;
+            margin: 15px 0 5px 0;
+        }
+
+        .lesson-body pre {
+            background: #030712;
+            border: 1px solid #1a365d;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            color: #00ff66;
+            overflow-x: auto;
+        }
+
+        .close-modal-btn {
+            background: transparent;
+            border: 1px solid #ff3333;
+            color: #ff3333;
+            padding: 4px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-family: inherit;
+            font-weight: bold;
+        }
+
+        .close-modal-btn:hover {
+            background: #ff3333;
+            color: #fff;
+        }
+
+        /* PROFILE VIEW */
+        .profile-container {
+            max-width: 700px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .profile-card {
+            background: #060e1e;
+            border: 1px solid #1a365d;
+            border-radius: 6px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 1rem;
+        }
+
+        .stat-label {
+            color: #a0aec0;
+        }
+
+        .stat-value {
+            color: #00ff66;
+            font-weight: bold;
+        }
+
+        .progress-bar-container {
+            background: #030712;
+            border: 1px solid #1a365d;
+            border-radius: 4px;
+            height: 20px;
+            width: 100%;
+            margin-top: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar-fill {
+            background: linear-gradient(90deg, #00e5ff, #00ff66);
+            height: 100%;
+            width: 0%;
+            transition: width 0.4s ease;
+            box-shadow: 0 0 10px #00ff66;
+        }
+
+        .danger-btn {
+            background: #2a0a0a;
+            color: #ff3333;
+            border: 1px solid #ff3333;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            border-radius: 4px;
+            transition: 0.2s;
+        }
+
+        .danger-btn:hover {
+            background: #ff3333;
+            color: #fff;
+            box-shadow: 0 0 15px #ff3333;
+        }
+
+        /* SCROLLBAR STYLING */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #030712;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1a365d;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00e5ff;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- DISCLAIMER MODAL -->
+    <div id="disclaimer-modal">
+        <div class="modal-content">
+            <h2>// ВНИМАНИЕ: СИМУЛЯТОР БЕЗОПАСНОСТИ</h2>
+            <p>Это симулятор. Реальный взлом без разрешения — незаконен и преследуется по закону. Все цели, IP-адреса и базы данных в этой программе являются виртуальными тренировочными полигонами.</p>
+            <button class="modal-btn" id="accept-disclaimer-btn">ПРИНЯТЬ И ВОЙТИ</button>
+        </div>
+    </div>
+
+    <!-- LESSON READER MODAL -->
+    <div id="lesson-modal">
+        <div class="lesson-reader">
+            <div class="lesson-header">
+                <h3 id="lesson-modal-title" style="color: #00e5ff;">Урок</h3>
+                <button class="close-modal-btn" id="close-lesson-modal">ЗАКРЫТЬ [X]</button>
+            </div>
+            <div class="lesson-body" id="lesson-modal-content">
+                <!-- Lesson content injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- HEADER NAVIGATION -->
+    <header>
+        <div class="logo">// CYBER_OS v2.4</div>
+        <div class="nav-tabs">
+            <button class="tab-btn active" data-target="terminal-view">ТЕРМИНАЛ</button>
+            <button class="tab-btn" data-target="lessons-view">УРОКИ (<span id="lessons-count-nav">0</span>/12)</button>
+            <button class="tab-btn" data-target="missions-view">МИССИИ (<span id="missions-count-nav">0</span>/20)</button>
+            <button class="tab-btn" data-target="profile-view">ПРОФИЛЬ</button>
+        </div>
+        <div class="user-stats-bar">
+            LVL: <span id="header-lvl">1</span> | XP: <span id="header-xp">0</span>
+        </div>
+    </header>
+
+    <!-- MAIN APP CONTAINER -->
+    <div class="app-container">
+
+        <!-- 1. TERMINAL VIEW -->
+        <div id="terminal-view" class="view-panel active">
+            <div class="terminal-output" id="terminal-output"></div>
+            <div class="terminal-input-bar">
+                <span class="terminal-prompt" id="terminal-prompt">root@cyber-sec:~#</span>
+                <input type="text" id="terminal-input" class="terminal-input" autofocus autocomplete="off" spellcheck="false">
+            </div>
+        </div>
+
+        <!-- 2. LESSONS VIEW -->
+        <div id="lessons-view" class="view-panel">
+            <div class="section-title">// УЧЕБНЫЕ МОДУЛИ ПО КИБЕРБЕЗОПАСНОСТИ</div>
+            <div class="lessons-grid" id="lessons-grid">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+
+        <!-- 3. MISSIONS VIEW -->
+        <div id="missions-view" class="view-panel">
+            <div class="section-title">// ТАКТИЧЕСКИЕ МИССИИ И ОПЕРАЦИИ</div>
+            <p style="color: #a0aec0; margin-bottom: 20px; font-size: 0.9rem;">Внимание оперативник: в миссиях нет прямых указаний. Используйте команды в терминале, логику и подсказки. Награда выдается за выполнение целей.</p>
+            <div class="missions-grid" id="missions-grid">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+
+        <!-- 4. PROFILE VIEW -->
+        <div id="profile-view" class="view-panel">
+            <div class="section-title">// ПРОФИЛЬ ОПЕРАТИВНИКА</div>
+            <div class="profile-container">
+                <div class="profile-card">
+                    <div class="stat-row">
+                        <span class="stat-label">Статус:</span>
+                        <span class="stat-value" style="color: #00ff66;">АКТИВЕН / АВТОРИЗОВАН</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Текущий Уровень:</span>
+                        <span class="stat-value" id="profile-lvl">1</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Опыт (XP):</span>
+                        <span class="stat-value"><span id="profile-xp">0</span> / <span id="profile-next-xp">100</span></span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Пройдено уроков:</span>
+                        <span class="stat-value"><span id="profile-lessons">0</span> / 12</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Выполнено миссий:</span>
+                        <span class="stat-value"><span id="profile-missions">0</span> / 20</span>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <span class="stat-label" style="font-size: 0.85rem;">Прогресс до следующего уровня:</span>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-fill" id="profile-progress-fill"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-card">
+                    <h3 style="color: #00e5ff; margin-bottom: 15px; font-size: 1rem;">// ДОСТИЖЕНИЯ</h3>
+                    <div id="achievements-list" style="display: flex; flex-direction: column; gap: 10px;">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
+
+                <div class="profile-card" style="border-color: #ff3333;">
+                    <h3 style="color: #ff3333; margin-bottom: 10px; font-size: 1rem;">// УПРАВЛЕНИЕ ДАННЫМИ</h3>
+                    <p style="color: #a0aec0; font-size: 0.85rem; margin-bottom: 15px;">Сброс прогресса сотрет весь накопленный опыт, выполненные миссии и уроки.</p>
+                    <button class="danger-btn" id="reset-progress-btn">СБРОСИТЬ ВЕСЬ ПРОГРЕСС</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- SCRIPT ENGINE (ES5 COMPATIBLE) -->
+    <script>
+        /* GLOBAL GAME STATE */
+        var gameState = {
+            xp: 0,
+            lvl: 1,
+            completedLessons: [],
+            completedMissions: [],
+            activeMission: null,
+            activeConnection: null, // IP or null
+            currentDir: "/home/root",
+            history: [],
+            historyIndex: -1,
+            fileSystem: {
+                "/": {
+                    type: "dir",
+                    content: {
+                        "etc": {
+                            type: "dir",
+                            content: {
+                                "passwd": { type: "file", content: "root:x:0:0:root:/root:/bin/bash\nadmin:x:1000:1000:admin,,,:/home/admin:/bin/bash\nguest:x:1001:1001:guest,,,:/home/guest:/bin/false" },
+                                "shadow": { type: "file", content: "root:$6$rounds=5000$saltsalt$Vk2J8H12m9aZ90x1... [PROTECTED HASH]\nadmin:$6$rounds=5000$saltsalt$9xK21...:18900:0:99999:7:::" },
+                                "hosts": { type: "file", content: "127.0.0.1 localhost\n192.168.1.10 gateway.local\n10.0.4.55 corp-db.internal\n172.16.42.99 secure-vault.net" }
+                            }
+                        },
+                        "home": {
+                            type: "dir",
+                            content: {
+                                "root": {
+                                    type: "dir",
+                                    content: {
+                                        "welcome.txt": { type: "file", content: "Добро пожаловать в CYBER_OS.\nИспользуйте команду 'help' для вывода списка доступных утилит.\nПройдите уроки и миссии для повышения квалификации." },
+                                        "todo.txt": { type: "file", content: "1. Проверить уязвимости на 10.0.4.55\n2. Расшифровать перехваченный бэкап\n3. Поднять уровень доступа на сервере" },
+                                        "flag.txt": { type: "file", content: "FLAG{CYBER_MASTER_2026_SECURE}" }
+                                    }
+                                }
+                            }
+                        },
+                        "var": {
+                            type: "dir",
+                            content: {
+                                "log": {
+                                    type: "dir",
+                                    content: {
+                                        "auth.log": { type: "file", content: "[INFO] SSH session opened for root from 192.168.1.50\n[WARN] Failed password for invalid user admin from 10.0.0.15\n[INFO] Sudo: user root executed /bin/bash" },
+                                        "syslog": { type: "file", content: "[OK] Kernel initialized.\n[OK] Network interface eth0 up.\n[ALERT] Port 22 scan detected from external IP 185.220.101.5" }
+                                    }
+                                }
+                            }
+                        },
+                        "tmp": {
+                            type: "dir",
+                            content: {
+                                "backup.enc": { type: "file", content: "U2FsdGVkX19mZXVpZHNhbmZpZXN1ZGZpaWV1Cg==" },
+                                "note.txt": { type: "file", content: "Пароль от базы данных: 'cyber_secret_99'" }
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        /* 12 LESSONS DATA */
+        var lessonsData = [
+            {
+                id: 1,
+                title: "1. Введение в системы",
+                desc: "Знакомство с архитектурой операционных систем и принципами работы командной строки.",
+                xp: 25,
+                content: "Операционная система управляет аппаратными ресурсами и предоставляет интерфейс для взаимодействия. В кибербезопасности ключевым инструментом является командная строка (Shell), позволяющая напрямую взаимодействовать с ядром и файлами.\n\nОсновные команды:\n- ls: просмотр файлов\n- pwd: текущая директория\n- whoami: информация о пользователе",
+                task: "Введите команду 'whoami' или 'pwd' в терминале."
+            },
+            {
+                id: 2,
+                title: "2. IP-адреса и порты",
+                desc: "Изучение сетевой идентификации, сетевых узлов и портов подключения.",
+                xp: 30,
+                content: "Каждое устройство в сети имеет IP-адрес (например, 192.168.1.1). Порты — это логические каналы связи (от 0 до 65535). Например, порт 22 используется для SSH, порт 80 для HTTP, а 443 для HTTPS.\n\nИнструменты:\n- ping: проверка доступности узла\n- nmap: сканирование открытых портов",
+                task: "Проверьте соединение с помощью команды 'ping 127.0.0.1'."
+            },
+            {
+                id: 3,
+                title: "3. Файловая система",
+                desc: "Навигация по иерархии папок, чтение и поиск файлов.",
+                xp: 30,
+                content: "В Linux всё является файлом. Файловая система имеет древовидную структуру, начиная с корневого каталога '/'.\n\nКоманды:\n- cd <папка>: смена директории\n- cat <файл>: чтение файла\n- find <имя>: поиск файла",
+                task: "Перейдите в папку /etc и прочитайте файл hosts."
+            },
+            {
+                id: 4,
+                title: "4. Шифрование",
+                desc: "Основы криптографии, кодирование Base64 и хеширование.",
+                xp: 35,
+                content: "Шифрование защищает конфиденциальность данных. Кодирование Base64 преобразует байты в текст (не является шифрованием!). Хеширование (MD5, SHA) создает необратимый цифровой отпечаток.\n\nКоманды:\n- base64 <текст/файл>\n- hash <текст>\n- encrypt / decrypt",
+                task: "Закодируйте или расшифруйте строку с помощью команды base64."
+            },
+            {
+                id: 5,
+                title: "5. Сети и подключения",
+                desc: "Удаленный доступ, сетевые интерфейсы и маршрутизация.",
+                xp: 35,
+                content: "Сетевые утилиты позволяют анализировать трафик и устанавливать защищенные соединения с удаленными серверами.\n\nКоманды:\n- ifconfig / ip: сетевые интерфейсы\n- netstat: активные соединения\n- traceroute: маршрут пакетов\n- connect / ssh: подключение",
+                task: "Используйте 'ifconfig' или 'netstat' в терминале."
+            },
+            {
+                id: 6,
+                title: "6. Уязвимости",
+                desc: "Поиск слабых мест в конфигурации и программном обеспечении.",
+                xp: 40,
+                content: "Уязвимость — это ошибка в системе безопасности. Специалисты сканируют цели для их обнаружения до того, как это сделают злоумышленники.\n\nКоманды:\n- scan: сканирование уязвимостей на узле",
+                task: "Выполните команду 'scan 192.168.1.10'."
+            },
+            {
+                id: 7,
+                title: "7. Терминал Linux",
+                desc: "Продвинутые приемы работы: фильтрация текста, история и переменные.",
+                xp: 30,
+                content: "Эффективное использование терминала ускоряет поиск и анализ информации.\n\nКоманды:\n- grep <шаблон> <файл>: поиск текста\n- history: история команд\n- clear: очистка экрана",
+                task: "Посмотрите историю введенных команд с помощью 'history'."
+            },
+            {
+                id: 8,
+                title: "8. Права доступа",
+                desc: "Модель прав пользователей и привилегии суперпользователя (root/sudo).",
+                xp: 40,
+                content: "В системах Linux разграничиваются права чтения (r), записи (w) и выполнения (x) для владельца, группы и остальных.\n\nКоманды:\n- whoami\n- sudo: выполнение от имени суперпользователя",
+                task: "Используйте 'sudo' для повышения прав в системе."
+            },
+            {
+                id: 9,
+                title: "9. Процессы",
+                desc: "Мониторинг запущенных программ и управление системными задачами.",
+                xp: 35,
+                content: "Каждая программа в ОС работает как процесс со своим PID (идентификатором).\n\nКоманды:\n- ps: список процессов\n- kill <PID>: завершение процесса",
+                task: "Выведите список процессов с помощью 'ps'."
+            },
+            {
+                id: 10,
+                title: "10. Логи и мониторинг",
+                desc: "Анализ системных журналов для обнаружения вторжений и сбоев.",
+                xp: 40,
+                content: "Журналы (логи) фиксируют все события в системе — от успешных входов до попыток взлома.\n\nПути:\n- /var/log/auth.log\n- /var/log/syslog",
+                task: "Прочитайте лог авторизации в /var/log/auth.log."
+            },
+            {
+                id: 11,
+                title: "11. Веб-технологии",
+                desc: "Взаимодействие с веб-серверами и протокол HTTP.",
+                xp: 35,
+                content: "Веб-приложения обрабатывают запросы пользователей. Для тестирования API и сайтов используются специальные запросы.\n\nКоманды:\n- curl <url>: отправка HTTP-запроса",
+                task: "Отправьте запрос с помощью 'curl http://localhost'."
+            },
+            {
+                id: 12,
+                title: "12. Социальная инженерия",
+                desc: "Психологические аспекты кибербезопасности и защита от манипуляций.",
+                xp: 40,
+                content: "Человеческий фактор — самое слабое звено в безопасности. Фишинг, поддельные письма и обман позволяют получить доступ в обход технических средств защиты.",
+                task: "Ознакомьтесь с основами защиты от фишинга и завершите курс."
+            }
+        ];
+
+        /* 20 MISSIONS DATA (NO SPOON-FED COMMANDS) */
+        var missionsData = [
+            { id: 1, title: "1. Разведка на местности", desc: "Подключитесь к локальному шлюзу и осмотрите текущее окружение.", xp: 35, target: "connect" },
+            { id: 2, title: "2. Поиск улик", desc: "Найдите файл с планом задач в домашней директории.", xp: 40, target: "cat_todo" },
+            { id: 3, title: "3. Секретный файл", desc: "Обнаружьте и прочитайте скрытый флаг в системе.", xp: 45, target: "cat_flag" },
+            { id: 4, title: "4. Расшифровка бэкапа", desc: "Расшифруйте перехваченный файл в папке /tmp.", xp: 50, target: "decrypt" },
+            { id: 5, title: "5. Взлом пароля", desc: "Подберите пароль к базе данных методом перебора.", xp: 55, target: "brute" },
+            { id: 6, title: "6. Сканирование портов", desc: "Просканируйте корпоративный сервер на наличие открытых портов.", xp: 40, target: "nmap" },
+            { id: 7, title: "7. Авторизация", desc: "Войдите в систему под учетной записью администратора.", xp: 50, target: "login" },
+            { id: 8, title: "8. Аудит уязвимостей", desc: "Запустите сканер уязвимостей на целевом IP.", xp: 45, target: "scan" },
+            { id: 9, title: "9. Обход защиты", desc: "Установите защищенное SSH-соединение с удаленным узлом.", xp: 60, target: "ssh" },
+            { id: 10, title: "10. Поиск информации", desc: "Найдите упоминание базы данных в файле конфигурации hosts.", xp: 40, target: "grep" },
+            { id: 11, title: "11. Анализ трафика", desc: "Исследуйте системный лог на предмет сетевых атак.", xp: 50, target: "cat_syslog" },
+            { id: 12, title: "12. Повышение привилегий", desc: "Получите права суперпользователя в системе.", xp: 65, target: "sudo" },
+            { id: 13, title: "13. Мониторинг процессов", desc: "Проверьте запущенные процессы в операционной системе.", xp: 35, target: "ps" },
+            { id: 14, title: "14. Хеширование", desc: "Создайте криптографический хеш для контрольной проверки.", xp: 40, target: "hash" },
+            { id: 15, title: "15. Защищенный узел", desc: "Успешно подключитесь к защищенному серверу по внешнему IP.", xp: 70, target: "connect_secure" },
+            { id: 16, title: "16. Анализ паролей", desc: "Изучите файл с учетными записями в системной директории etc.", xp: 45, target: "cat_passwd" },
+            { id: 17, title: "17. Веб-запрос", desc: "Выполните тестовый HTTP-запрос к локальному веб-серверу.", xp: 40, target: "curl" },
+            { id: 18, title: "18. Кодирование данных", desc: "Закодируйте текстовую строку в формат Base64.", xp: 35, target: "base64" },
+            { id: 19, title: "19. Трассировка сети", desc: "Проложите маршрут пакетов до целевого сервера.", xp: 50, target: "traceroute" },
+            { id: 20, title: "20. Фиксация победы", desc: "Изучите историю команд и подготовьте отчет о прохождении тренажера.", xp: 80, target: "history" }
+        ];
+
+        /* ACHIEVEMENTS DEFINITIONS */
+        var achievementsDef = [
+            { id: "first_cmd", title: "Первый шаг", desc: "Введите свою первую команду в терминале", unlocked: false },
+            { id: "student", title: "Студент академии", desc: "Пройдите не менее 3 уроков", unlocked: false },
+            { id: "hacker_novice", title: "Начинающий хакер", desc: "Выполните 5 миссий", unlocked: false },
+            { id: "crypto_master", title: "Криптограф", desc: "Используйте команды шифрования или хеширования", unlocked: false },
+            { id: "root_access", title: "Властелин системы", desc: "Получите права суперпользователя (sudo)", unlocked: false },
+            { id: "elite", title: "Элита кибербезопасности", desc: "Достигните 5 уровня", unlocked: false }
+        ];
+
+        /* LOCALSTORAGE PERSISTENCE */
+        function loadGameData() {
+            try {
+                var saved = localStorage.getItem("cyber_sim_save_v2");
+                if (saved) {
+                    var data = JSON.parse(saved);
+                    gameState.xp = data.xp || 0;
+                    gameState.lvl = data.lvl || 1;
+                    gameState.completedLessons = data.completedLessons || [];
+                    gameState.completedMissions = data.completedMissions || [];
+                    if (data.achievements) {
+                        for (var i = 0; i < achievementsDef.length; i++) {
+                            for (var j = 0; j < data.achievements.length; j++) {
+                                if (achievementsDef[i].id === data.achievements[j].id) {
+                                    achievementsDef[i].unlocked = data.achievements[j].unlocked;
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error("Load error", e);
+            }
+        }
+
+        function saveGameData() {
+            try {
+                localStorage.setItem("cyber_sim_save_v2", JSON.stringify({
+                    xp: gameState.xp,
+                    lvl: gameState.lvl,
+                    completedLessons: gameState.completedLessons,
+                    completedMissions: gameState.completedMissions,
+                    achievements: achievementsDef
+                }));
+            } catch (e) {
+                console.error("Save error", e);
+            }
+        }
+
+        /* ADD XP & LEVEL CHECK */
+        function addXP(amount) {
+            gameState.xp += amount;
+            var nextLevelXP = gameState.lvl * 100;
+            if (gameState.xp >= nextLevelXP) {
+                gameState.lvl += 1;
+                printTerminal("===> ПОВЫШЕНИЕ УРОВНЯ! Ваш уровень теперь: " + gameState.lvl, "t-success");
+                checkAchievement("elite");
+            }
+            updateHeaderStats();
+            updateProfileView();
+            saveGameData();
+        }
+
+        /* CHECK ACHIEVEMENTS */
+        function checkAchievement(id) {
+            for (var i = 0; i < achievementsDef.length; i++) {
+                if (achievementsDef[i].id === id && !achievementsDef[i].unlocked) {
+                    achievementsDef[i].unlocked = true;
+                    printTerminal("ДОСТИЖЕНИЕ РАЗБЛОКИРОВАНО: " + achievementsDef[i].title, "t-warning");
+                    saveGameData();
+                    updateProfileView();
+                    break;
+                }
+            }
+        }
+
+        /* CHECK MISSION COMPLETION TRIGGER */
+        function checkMissionTrigger(actionKey) {
+            for (var i = 0; i < missionsData.length; i++) {
+                var m = missionsData[i];
+                if (m.target === actionKey) {
+                    var alreadyDone = false;
+                    for (var j = 0; j < gameState.completedMissions.length; j++) {
+                        if (gameState.completedMissions[j] === m.id) {
+                            alreadyDone = true;
+                            break;
+                        }
+                    }
+                    if (!alreadyDone) {
+                        gameState.completedMissions.push(m.id);
+                        addXP(m.xp);
+                        printTerminal(">>> МИССИЯ ВЫПОЛНЕНА [" + m.id + "]: " + m.title + " (+" + m.xp + " XP)", "t-success");
+                        if (gameState.completedMissions.length >= 5) {
+                            checkAchievement("hacker_novice");
+                        }
+                        updateMissionsView();
+                        updateHeaderStats();
+                    }
+                }
+            }
+        }
+
+        /* INITIALIZATION & DOM BINDING */
+        window.addEventListener("DOMContentLoaded", function () {
+            loadGameData();
+            updateHeaderStats();
+            renderLessons();
+            renderMissions();
+            updateProfileView();
+
+            // Disclaimer Modal
+            var disclaimerModal = document.getElementById("disclaimer-modal");
+            var acceptBtn = document.getElementById("accept-disclaimer-btn");
+            acceptBtn.addEventListener("click", function () {
+                disclaimerModal.style.display = "none";
+                printTerminal("CYBER_OS v2.4 запущен успешно.", "t-success");
+                printTerminal("Введите 'help' для просмотра списка доступных команд.", "t-info");
+                printTerminal("--------------------------------------------------", "t-dim");
+            });
+
+            // Navigation Tabs
+            var tabButtons = document.querySelectorAll(".tab-btn");
+            for (var i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].addEventListener("click", function () {
+                    var targetId = this.getAttribute("data-target");
+                    var panels = document.querySelectorAll(".view-panel");
+                    for (var p = 0; p < panels.length; p++) {
+                        panels[p].classList.remove("active");
+                    }
+                    document.getElementById(targetId).classList.add("active");
+
+                    for (var t = 0; t < tabButtons.length; t++) {
+                        tabButtons[t].classList.remove("active");
+                    }
+                    this.classList.add("active");
+
+                    if (targetId === "terminal-view") {
+                        document.getElementById("terminal-input").focus();
+                    }
+                });
+            }
+
+            // Terminal Input Handler
+            var termInput = document.getElementById("terminal-input");
+            termInput.addEventListener("keydown", function (e) {
+                if (e.key === "Enter" || e.keyCode === 13) {
+                    var cmdLine = termInput.value.trim();
+                    termInput.value = "";
+                    if (cmdLine !== "") {
+                        gameState.history.push(cmdLine);
+                        gameState.historyIndex = gameState.history.length;
+                        printTerminal("root@cyber-sec:~# " + cmdLine, "t-dim");
+                        processCommand(cmdLine);
+                        checkAchievement("first_cmd");
+                    }
+                } else if (e.key === "ArrowUp" || e.keyCode === 38) {
+                    if (gameState.history.length > 0 && gameState.historyIndex > 0) {
+                        gameState.historyIndex--;
+                        termInput.value = gameState.history[gameState.historyIndex];
+                    }
+                } else if (e.key === "ArrowDown" || e.keyCode === 40) {
+                    if (gameState.history.length > 0 && gameState.historyIndex < gameState.history.length - 1) {
+                        gameState.historyIndex++;
+                        termInput.value = gameState.history[gameState.historyIndex];
+                    } else {
+                        gameState.historyIndex = gameState.history.length;
+                        termInput.value = "";
+                    }
+                }
+            });
+
+            // Lesson Modal Close
+            document.getElementById("close-lesson-modal").addEventListener("click", function () {
+                document.getElementById("lesson-modal").style.display = "none";
+            });
+
+            // Reset Progress Button
+            document.getElementById("reset-progress-btn").addEventListener("click", function () {
+                if (confirm("Вы уверены, что хотите сбросить весь прогресс?")) {
+                    localStorage.removeItem("cyber_sim_save_v2");
+                    gameState.xp = 0;
+                    gameState.lvl = 1;
+                    gameState.completedLessons = [];
+                    gameState.completedMissions = [];
+                    for (var i = 0; i < achievementsDef.length; i++) {
+                        achievementsDef[i].unlocked = false;
+                    }
+                    updateHeaderStats();
+                    renderLessons();
+                    renderMissions();
+                    updateProfileView();
+                    printTerminal("Прогресс успешно сброшен.", "t-warning");
+                    alert("Прогресс сброшен!");
+                }
+            });
+        });
+
+        /* TERMINAL PRINT HELPER */
+        function printTerminal(text, className) {
+            var output = document.getElementById("terminal-output");
+            var line = document.createElement("div");
+            line.className = "terminal-line " + (className || "");
+            line.textContent = text;
+            output.appendChild(line);
+            output.scrollTop = output.scrollHeight;
+        }
+
+        /* RESOLVE PATH HELPER */
+        function resolvePath(pathStr) {
+            if (!pathStr) return gameState.currentDir;
+            var target = pathStr;
+            if (target === "/") return "/";
+            if (target === "~") return "/home/root";
+            
+            var base = target.charAt(0) === "/" ? "/" : gameState.currentDir;
+            var parts = (base + "/" + target).split("/");
+            var resolved = [];
+            for (var i = 0; i < parts.length; i++) {
+                var p = parts[i];
+                if (p === "" || p === ".") continue;
+                if (p === "..") {
+                    resolved.pop();
+                } else {
+                    resolved.push(p);
+                }
+            }
+            return "/" + resolved.join("/");
+        }
+
+        function getNodeByPath(pathStr) {
+            var fullPath = resolvePath(pathStr);
+            if (fullPath === "/") return gameState.fileSystem["/"];
+            var parts = fullPath.split("/").slice(1);
+            var current = gameState.fileSystem["/"];
+            for (var i = 0; i < parts.length; i++) {
+                if (current.type === "dir" && current.content && current.content[parts[i]]) {
+                    current = current.content[parts[i]];
+                } else {
+                    return null;
+                }
+            }
+            return current;
+        }
+
+        /* COMMAND PROCESSOR (30+ COMMANDS) */
+        function processCommand(fullCmd) {
+            var parts = fullCmd.split(" ");
+            var cmd = parts[0].toLowerCase();
+            var args = parts.slice(1);
+
+            switch (cmd) {
+                case "help":
+                    printTerminal("Доступные команды в CYBER_OS:", "t-info");
+                    printTerminal("  help           - список команд");
+                    printTerminal("  ls             - показать файлы в текущей папке");
+                    printTerminal("  cd <путь>      - перейти в папку");
+                    printTerminal("  cat <файл>     - прочитать содержимое файла");
+                    printTerminal("  pwd            - текущая рабочая папка");
+                    printTerminal("  whoami         - текущий пользователь");
+                    printTerminal("  clear          - очистить экран терминала");
+                    printTerminal("  ping <ip>      - проверить сетевое соединение");
+                    printTerminal("  nmap <ip>      - сканировать порты узла");
+                    printTerminal("  scan <ip>      - сканировать уязвимости системы");
+                    printTerminal("  connect <ip>   - подключиться к удаленному серверу");
+                    printTerminal("  ssh <user@ip>  - безопасное SSH-подключение");
+                    printTerminal("  decrypt <file> - расшифровать файл");
+                    printTerminal("  encrypt <file> - зашифровать файл");
+                    printTerminal("  brute <target> - подобрать пароль (Brute-force)");
+                    printTerminal("  login <user>   - войти под учетной записью");
+                    printTerminal("  sudo <cmd>     - выполнить команду с правами root");
+                    printTerminal("  grep <term> <f>- поиск текста в файлах");
+                    printTerminal("  find <name>    - найти файл в системе");
+                    printTerminal("  ps             - список запущенных процессов");
+                    printTerminal("  kill <pid>     - завершить процесс по PID");
+                    printTerminal("  curl <url>     - выполнить HTTP-запрос");
+                    printTerminal("  base64 <txt>   - кодировать / декодировать base64");
+                    printTerminal("  hash <txt>     - создать хеш (SHA-256)");
+                    printTerminal("  history        - история введенных команд");
+                    printTerminal("  echo <text>    - вывести текст на экран");
+                    printTerminal("  date           - текущая дата и системное время");
+                    printTerminal("  uname          - информация об операционной системе");
+                    printTerminal("  ifconfig       - сетевые интерфейсы и IP");
+                    printTerminal("  netstat        - активные сетевые соединения");
+                    printTerminal("  traceroute     - трассировка маршрута пакетов");
+                    printTerminal("  missions       - список активных миссий");
+                    printTerminal("  hint           - получить подсказку (тратит 10 XP)");
+                    break;
+
+                case "ls":
+                    var targetDir = args[0] ? getNodeByPath(args[0]) : getNodeByPath(gameState.currentDir);
+                    if (targetDir && targetDir.type === "dir") {
+                        var keys = [];
+                        for (var k in targetDir.content) {
+                            if (targetDir.content.hasOwnProperty(k)) keys.push(k);
+                        }
+                        printTerminal("Содержимое " + (args[0] || gameState.currentDir) + ":", "t-info");
+                        for (var i = 0; i < keys.length; i++) {
+                            var item = targetDir.content[keys[i]];
+                            var prefix = item.type === "dir" ? "[DIR]  " : "[FILE] ";
+                            printTerminal("  " + prefix + keys[i]);
+                        }
+                    } else {
+                        printTerminal("Ошибка: директория не найдена", "t-error");
+                    }
+                    break;
+
+                case "cd":
+                    if (!args[0] || args[0] === "~") {
+                        gameState.currentDir = "/home/root";
+                        document.getElementById("terminal-prompt").textContent = "root@cyber-sec:" + gameState.currentDir + "#";
+                        break;
+                    }
+                    var newPath = resolvePath(args[0]);
+                    var node = getNodeByPath(newPath);
+                    if (node && node.type === "dir") {
+                        gameState.currentDir = newPath;
+                        document.getElementById("terminal-prompt").textContent = "root@cyber-sec:" + gameState.currentDir + "#";
+                    } else {
+                        printTerminal("Ошибка: каталог не найден или это файл", "t-error");
+                    }
+                    break;
+
+                case "pwd":
+                    printTerminal(gameState.currentDir);
+                    break;
+
+                case "whoami":
+                    printTerminal("root (Superuser)");
+                    break;
+
+                case "clear":
+                    document.getElementById("terminal-output").innerHTML = "";
+                    break;
+
+                case "ping":
+                    if (!args[0]) {
+                        printTerminal("Использование: ping <ip или хост>", "t-warning");
+                        break;
+                    }
+                    printTerminal("PING " + args[0] + " (56 octets of data):");
+                    printTerminal("64 bytes from " + args[0] + ": icmp_seq=1 ttl=64 time=0.421 ms", "t-success");
+                    printTerminal("64 bytes from " + args[0] + ": icmp_seq=2 ttl=64 time=0.389 ms", "t-success");
+                    printTerminal("--- " + args[0] + " ping statistics ---");
+                    printTerminal("2 packets transmitted, 2 received, 0% packet loss", "t-success");
+                    break;
+
+                case "nmap":
+                    var targetIP = args[0] || "192.168.1.10";
+                    printTerminal("Starting Nmap scan ( https://nmap.org ) at 2026-10-16 20:29 MSK", "t-info");
+                    printTerminal("Nmap scan report for " + targetIP);
+                    printTerminal("Host is up (0.00032s latency).");
+                    printTerminal("PORT     STATE SERVICE");
+                    printTerminal("21/tcp   open  ftp");
+                    printTerminal("22/tcp   open  ssh");
+                    printTerminal("80/tcp   open  http");
+                    printTerminal("3306/tcp open  mysql", "t-warning");
+                    printTerminal("Nmap done: 1 IP address (1 host up) scanned in 0.23 seconds");
+                    checkMissionTrigger("nmap");
+                    break;
+
+                case "scan":
+                    var sTarget = args[0] || "10.0.4.55";
+                    printTerminal("Инициализация сканирования уязвимостей на " + sTarget + "...", "t-info");
+                    printTerminal("[+] Обнаружена уязвимость CVE-2026-9912: Weak Auth Bypass", "t-warning");
+                    printTerminal("[+] Обнаружен устаревший демон OpenSSH 7.2", "t-warning");
+                    printTerminal("Сканирование завершено. Уязвимости найдены.", "t-success");
+                    checkMissionTrigger("scan");
+                    break;
+
+                case "connect":
+                    if (!args[0]) {
+                        printTerminal("Использование: connect <ip>", "t-warning");
+                        break;
+                    }
+                    gameState.activeConnection = args[0];
+                    printTerminal("Успешное сетевое соединение с узлом " + args[0] + " установленно.", "t-success");
+                    checkMissionTrigger("connect");
+                    if (args[0].indexOf("172.") === 0 || args[0].indexOf("secure") !== -1) {
+                        checkMissionTrigger("connect_secure");
+                    }
+                    break;
+
+                case "ssh":
+                    if (!args[0]) {
+                        printTerminal("Использование: ssh user@ip", "t-warning");
+                        break;
+                    }
+                    printTerminal("Connecting to " + args[0] + "...");
+                    printTerminal("The authenticity of host can't be established.");
+                    printTerminal("ECDSA key fingerprint is SHA256:Su891aK2L10... Connected.", "t-success");
+                    checkMissionTrigger("ssh");
+                    break;
+
+                case "cat":
+                    if (!args[0]) {
+                        printTerminal("Использование: cat <файл>", "t-warning");
+                        break;
+                    }
+                    var fileNode = getNodeByPath(args[0]);
+                    if (fileNode && fileNode.type === "file") {
+                        printTerminal(fileNode.content);
+                        if (args[0].indexOf("todo") !== -1) checkMissionTrigger("cat_todo");
+                        if (args[0].indexOf("flag") !== -1) checkMissionTrigger("cat_flag");
+                        if (args[0].indexOf("syslog") !== -1) checkMissionTrigger("cat_syslog");
+                        if (args[0].indexOf("passwd") !== -1) checkMissionTrigger("cat_passwd");
+                    } else {
+                        printTerminal("Ошибка: файл не найден", "t-error");
+                    }
+                    break;
+
+                case "decrypt":
+                    printTerminal("[*] Запуск расшифрования файла AES-256...", "t-info");
+                    printTerminal("[+] Ключ успешно подобран по словарю.");
+                    printTerminal("Расшифрованное содержимое: FLAG{DECRYPT_SUCCESS_9812}", "t-success");
+                    checkMissionTrigger("decrypt");
+                    checkAchievement("crypto_master");
+                    break;
+
+                case "encrypt":
+                    printTerminal("[*] Шифрование данных завершено успешно.", "t-success");
+                    checkAchievement("crypto_master");
+                    break;
+
+                case "brute":
+                    printTerminal("[*] Запуск подбора пароля (Brute-force) для базы данных...", "t-info");
+                    printTerminal("[+] Попытка 1/100: admin:123456 [FAIL]");
+                    printTerminal("[+] Попытка 42/100: root:password [FAIL]");
+                    printTerminal("[+] Попытка 89/100: db_admin:cyber_secret_99 [SUCCESS]", "t-success");
+                    printTerminal("Пароль найден: cyber_secret_99", "t-success");
+                    checkMissionTrigger("brute");
+                    break;
+
+                case "login":
+                    if (!args[0]) {
+                        printTerminal("Использование: login <username>", "t-warning");
+                        break;
+                    }
+                    printTerminal("Авторизация пользователя " + args[0] + " прошла успешно.", "t-success");
+                    checkMissionTrigger("login");
+                    break;
+
+                case "sudo":
+                    if (args.length === 0) {
+                        printTerminal("Использование: sudo <команда>", "t-warning");
+                        break;
+                    }
+                    printTerminal("[sudo] пароль для root: ");
+                    printTerminal("Права суперпользователя подтверждены.", "t-success");
+                    checkAchievement("root_access");
+                    checkMissionTrigger("sudo");
+                    break;
+
+                case "grep":
+                    if (args.length < 2) {
+                        printTerminal("Использование: grep <термин> <файл>", "t-warning");
+                        break;
+                    }
+                    printTerminal("Найденные совпадения для '" + args[0] + "':");
+                    printTerminal("10.0.4.55 corp-db.internal", "t-success");
+                    checkMissionTrigger("grep");
+                    break;
+
+                case "find":
+                    printTerminal("Поиск файла '" + (args[0] || "*") + "' в системе...");
+                    printTerminal("/home/root/flag.txt", "t-success");
+                    printTerminal("/etc/passwd", "t-success");
+                    break;
+
+                case "ps":
+                    printTerminal("PID  TTY          TIME CMD");
+                    printTerminal("  1  ?        00:00:02 systemd");
+                    printTerminal(" 45  ?        00:00:00 sshd");
+                    printTerminal("102  pts/0    00:00:01 bash");
+                    printTerminal("309  pts/0    00:00:00 cyber_sim", "t-success");
+                    checkMissionTrigger("ps");
+                    break;
+
+                case "kill":
+                    if (!args[0]) {
+                        printTerminal("Использование: kill <PID>", "t-warning");
+                        break;
+                    }
+                    printTerminal("Процесс " + args[0] + " успешно завершен.", "t-success");
+                    break;
+
+                case "curl":
+                    var url = args[0] || "http://localhost";
+                    printTerminal("HTTP/1.1 200 OK");
+                    printTerminal("Server: nginx/1.18.0");
+                    printTerminal("Content-Type: text/html; charset=UTF-8");
+                    printTerminal("<!DOCTYPE html><html><body><h1>CYBER_SERVER ACTIVE</h1></body></html>", "t-success");
+                    checkMissionTrigger("curl");
+                    break;
+
+                case "base64":
+                    var textToEncode = args.slice(1).join(" ") || "CYBER_SEC";
+                    printTerminal("Результат base64: Q1lCRVJfU0VD", "t-success");
+                    checkMissionTrigger("base64");
+                    checkAchievement("crypto_master");
+                    break;
+
+                case "hash":
+                    printTerminal("SHA-256 Hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "t-success");
+                    checkMissionTrigger("hash");
+                    checkAchievement("crypto_master");
+                    break;
+
+                case "history":
+                    printTerminal("История введенных команд:", "t-info");
+                    for (var h = 0; h < gameState.history.length; h++) {
+                        printTerminal("  " + (h + 1) + "  " + gameState.history[h]);
+                    }
+                    checkMissionTrigger("history");
+                    break;
+
+                case "echo":
+                    printTerminal(args.join(" "));
+                    break;
+
+                case "date":
+                    printTerminal(new Date().toString());
+                    break;
+
+                case "uname":
+                    printTerminal("Linux cyber-sec 5.4.0-77-generic #86-Ubuntu SMP x86_64 GNU/Linux");
+                    break;
+
+                case "ifconfig":
+                    printTerminal("eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST> mtu 1500");
+                    printTerminal("        inet 192.168.1.50  netmask 255.255.255.0  broadcast 192.168.1.255");
+                    printTerminal("        RX packets 4219  bytes 314159 (314.1 KB)");
+                    break;
+
+                case "netstat":
+                    printTerminal("Active Internet connections (w/o servers)");
+                    printTerminal("Proto Recv-Q Send-Q Local Address           Foreign Address         State");
+                    printTerminal("tcp        0      0 192.168.1.50:44122      192.168.1.10:22         ESTABLISHED");
+                    printTerminal("tcp        0      0 127.0.0.1:80            127.0.0.1:49210         TIME_WAIT");
+                    break;
+
+                case "traceroute":
+                    printTerminal("traceroute to target (10.0.4.55), 30 hops max");
+                    printTerminal(" 1  gateway.local (192.168.1.1)  0.412 ms");
+                    printTerminal(" 2  corp-router.internal (10.0.0.1)  1.214 ms");
+                    printTerminal(" 3  corp-db.internal (10.0.4.55)  2.051 ms", "t-success");
+                    checkMissionTrigger("traceroute");
+                    break;
+
+                case "missions":
+                    printTerminal("Список активных миссий:", "t-info");
+                    for (var m = 0; m < missionsData.length; m++) {
+                        var mis = missionsData[m];
+                        var done = false;
+                        for (var d = 0; d < gameState.completedMissions.length; d++) {
+                            if (gameState.completedMissions[d] === mis.id) done = true;
+                        }
+                        var statusStr = done ? "[ВЫПОЛНЕНО]" : "[АКТИВНО]";
+                        printTerminal("  " + mis.id + ". " + mis.title + " " + statusStr);
+                    }
+                    break;
+
+                case "hint":
+                    if (gameState.xp >= 10) {
+                        gameState.xp -= 10;
+                        updateHeaderStats();
+                        updateProfileView();
+                        printTerminal("ПОДСКАЗКА: Внимательно читайте описания миссий. Используйте команды 'nmap', 'connect', 'scan', 'cat' или 'brute'.", "t-warning");
+                    } else {
+                        printTerminal("Недостаточно XP для подсказки (требуется 10 XP).", "t-error");
+                    }
+                    break;
+
+                case "":
+                    break;
+
+                default:
+                    printTerminal("Команда не найдена: " + cmd + ". Введите 'help' для справки.", "t-error");
+                    break;
+            }
+        }
+
+        /* RENDER LESSONS */
+        function renderLessons() {
+            var grid = document.getElementById("lessons-grid");
+            grid.innerHTML = "";
+            for (var i = 0; i < lessonsData.length; i++) {
+                var l = lessonsData[i];
+                var isCompleted = false;
+                for (var c = 0; c < gameState.completedLessons.length; c++) {
+                    if (gameState.completedLessons[c] === l.id) isCompleted = true;
+                }
+
+                var card = document.createElement("div");
+                card.className = "card";
+                
+                var titleH = document.createElement("h3");
+                titleH.textContent = l.title;
+                card.appendChild(titleH);
+
+                var descP = document.createElement("p");
+                descP.textContent = l.desc;
+                card.appendChild(descP);
+
+                var metaDiv = document.createElement("div");
+                metaDiv.className = "card-meta";
+                metaDiv.innerHTML = "<span>Награда: +" + l.xp + " XP</span><span>" + (isCompleted ? "Пройдено" : "Новый") + "</span>";
+                card.appendChild(metaDiv);
+
+                var btn = document.createElement("button");
+                btn.className = "action-btn " + (isCompleted ? "completed" : "");
+                btn.textContent = isCompleted ? "ПОВТОРИТЬ УРОК" "ИЗУЧИТЬ";
+                
+                // Using closure for lesson click
+                (function (lessonObj, completed) {
+                    btn.addEventListener("click", function () {
+                        openLessonModal(lessonObj);
+                    });
+                })(l, isCompleted);
+
+                card.appendChild(btn);
+                grid.appendChild(card);
+            }
+            document.getElementById("lessons-count-nav").textContent = gameState.completedLessons.length;
+        }
+
+        /* OPEN LESSON MODAL */
+        function openLessonModal(lesson) {
+            var modal = document.getElementById("lesson-modal");
+            document.getElementById("lesson-modal-title").textContent = lesson.title;
+            
+            var contentDiv = document.getElementById("lesson-modal-content");
+            contentDiv.innerHTML = "";
+
+            var textP = document.createElement("p");
+            textP.textContent = lesson.content;
+            contentDiv.appendChild(textP);
+
+            var taskH = document.createElement("h4");
+            taskH.textContent = "Практическое задание:";
+            contentDiv.appendChild(taskH);
+
+            var taskP = document.createElement("p");
+            taskP.textContent = lesson.task;
+            contentDiv.appendChild(taskP);
+
+            var completeBtn = document.createElement("button");
+            completeBtn.className = "action-btn";
+            completeBtn.style.marginTop = "20px";
+            completeBtn.style.width = "100%";
+            completeBtn.textContent = "ЗАВЕРШИТЬ УРОК И ПОЛУЧИТЬ +" + lesson.xp + " XP";
+            
+            completeBtn.addEventListener("click", function () {
+                var alreadyDone = false;
+                for (var i = 0; i < gameState.completedLessons.length; i++) {
+                    if (gameState.completedLessons[i] === lesson.id) alreadyDone = true;
+                }
+                if (!alreadyDone) {
+                    gameState.completedLessons.push(lesson.id);
+                    addXP(lesson.xp);
+                    if (gameState.completedLessons.length >= 3) {
+                        checkAchievement("student");
+                    }
+                    renderLessons();
+                    printTerminal("Урок пройден: " + lesson.title + " (+" + lesson.xp + " XP)", "t-success");
+                }
+                modal.style.display = "none";
+            });
+
+            contentDiv.appendChild(completeBtn);
+            modal.style.display = "flex";
+        }
+
+        /* RENDER MISSIONS */
+        function renderMissions() {
+            var grid = document.getElementById("missions-grid");
+            grid.innerHTML = "";
+            for (var i = 0; i < missionsData.length; i++) {
+                var m = missionsData[i];
+                var isCompleted = false;
+                for (var c = 0; c < gameState.completedMissions.length; c++) {
+                    if (gameState.completedMissions[c] === m.id) isCompleted = true;
+                }
+
+                var card = document.createElement("div");
+                card.className = "card";
+                
+                var titleH = document.createElement("h3");
+                titleH.textContent = m.title;
+                card.appendChild(titleH);
+
+                var descP = document.createElement("p");
+                descP.textContent = m.desc;
+                card.appendChild(descP);
+
+                var metaDiv = document.createElement("div");
+                metaDiv.className = "card-meta";
+                metaDiv.innerHTML = "<span>Награда: +" + m.xp + " XP</span><span>" + (isCompleted ? "Выполнено" : "Ожидание") + "</span>";
+                card.appendChild(metaDiv);
+
+                var btn = document.createElement("button");
+                btn.className = "action-btn " + (isCompleted ? "completed" : "");
+                btn.textContent = isCompleted ? "МИССИЯ ВЫПОЛНЕНА" : "ПЕРЕЙТИ В ТЕРМИНАЛ";
+
+                (function (missionObj, completed) {
+                    btn.addEventListener("click", function () {
+                        // Switch to terminal tab
+                        var tabBtns = document.querySelectorAll(".tab-btn");
+                        for (var t = 0; t < tabBtns.length; t++) {
+                            tabBtns[t].classList.remove("active");
+                        }
+                        tabBtns[0].classList.add("active");
+
+                        var panels = document.querySelectorAll(".view-panel");
+                        for (var p = 0; p < panels.length; p++) {
+                            panels[p].classList.remove("active");
+                        }
+                        document.getElementById("terminal-view").classList.add("active");
+                        document.getElementById("terminal-input").focus();
+                        printTerminal("Операция выбрана: " + missionObj.title + ". Введите команду в терминале.", "t-info");
+                    });
+                })(m, isCompleted);
+
+                card.appendChild(btn);
+                grid.appendChild(card);
+            }
+            document.getElementById("missions-count-nav").textContent = gameState.completedMissions.length;
+        }
+
+        function updateMissionsView() {
+            renderMissions();
+        }
+
+        /* UPDATE PROFILE VIEW & STATS */
+        function updateHeaderStats() {
+            document.getElementById("header-lvl").textContent = gameState.lvl;
+            document.getElementById("header-xp").textContent = gameState.xp;
+        }
+
+        function updateProfileView() {
+            document.getElementById("profile-lvl").textContent = gameState.lvl;
+            document.getElementById("profile-xp").textContent = gameState.xp;
+            var nextXP = gameState.lvl * 100;
+            document.getElementById("profile-next-xp").textContent = nextXP;
+            document.getElementById("profile-lessons").textContent = gameState.completedLessons.length;
+            document.getElementById("profile-missions").textContent = gameState.completedMissions.length;
+
+            var percent = Math.min(100, Math.floor((gameState.xp / nextXP) * 100));
+            document.getElementById("profile-progress-fill").style.width = percent + "%";
+
+            // Render Achievements
+            var achList = document.getElementById("achievements-list");
+            achList.innerHTML = "";
+            for (var i = 0; i < achievementsDef.length; i++) {
+                var a = achievementsDef[i];
+                var row = document.createElement("div");
+                row.style.display = "flex";
+                row.style.justifyContent = "space-between";
+                row.style.alignItems = "center";
+                row.style.padding = "8px";
+                row.style.background = "#030712";
+                row.style.borderRadius = "4px";
+                row.style.border = "1px solid " + (a.unlocked ? "#00ff66" : "#1a365d");
+
+                var info = document.createElement("div");
+                info.innerHTML = "<strong style='color: " + (a.unlocked ? "#00ff66" : "#a0aec0") + ";'>" + a.title + "</strong><br><small style='color: #4a5568;'>" + a.desc + "</small>";
+                row.appendChild(info);
+
+                var badge = document.createElement("span");
+                badge.style.fontSize = "0.8rem";
+                badge.style.color = a.unlocked ? "#00ff66" : "#4a5568";
+                badge.textContent = a.unlocked ? "[РАЗБЛОКИРОВАНО]" : "[ЗАКРЫТО]";
+                row.appendChild(badge);
+
+                achList.appendChild(row);
+            }
+        }
+    </script>
+</body>
+</html>
