@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CYBER_TERMINAL // v2.4.0 [SECURE SIMULATOR]</title>
+    <title>CYBER_TERMINAL // v2.5.0 [SECURE SIMULATOR]</title>
     <style>
         /* RESET & BASE STYLES */
         * {
@@ -87,7 +87,6 @@
             font-weight: bold;
             font-size: 0.9rem;
             border-radius: 3px;
-            transition: all 0.2s ease;
             box-shadow: inset 0 0 5px rgba(0, 255, 102, 0.2);
         }
 
@@ -129,7 +128,7 @@
         #disclaimer-modal {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(3, 7, 18, 0.95);
+            background: rgba(3, 7, 18, 0.98);
             z-index: 100000;
             display: flex;
             justify-content: center;
@@ -165,19 +164,18 @@
             background: #ff3333;
             color: #fff;
             border: none;
-            padding: 10px 25px;
+            padding: 12px 30px;
             font-family: inherit;
             font-weight: bold;
-            font-size: 1rem;
+            font-size: 1.1rem;
             cursor: pointer;
             border-radius: 4px;
             box-shadow: 0 0 10px rgba(255, 51, 51, 0.5);
-            transition: 0.2s;
         }
 
         .modal-btn:hover {
             background: #ff0000;
-            box-shadow: 0 0 15px #ff0000;
+            box-shadow: 0 0 20px #ff0000;
         }
 
         /* TERMINAL VIEW STYLING */
@@ -258,7 +256,6 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            transition: all 0.2s;
             box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
         }
 
@@ -299,7 +296,6 @@
             font-weight: bold;
             border-radius: 4px;
             text-align: center;
-            transition: 0.2s;
         }
 
         .action-btn:hover {
@@ -359,16 +355,6 @@
         .lesson-body h4 {
             color: #00ff66;
             margin: 15px 0 5px 0;
-        }
-
-        .lesson-body pre {
-            background: #030712;
-            border: 1px solid #1a365d;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 4px;
-            color: #00ff66;
-            overflow-x: auto;
         }
 
         .close-modal-btn {
@@ -434,7 +420,6 @@
             background: linear-gradient(90deg, #00e5ff, #00ff66);
             height: 100%;
             width: 0%;
-            transition: width 0.4s ease;
             box-shadow: 0 0 10px #00ff66;
         }
 
@@ -447,7 +432,6 @@
             font-family: inherit;
             font-weight: bold;
             border-radius: 4px;
-            transition: 0.2s;
         }
 
         .danger-btn:hover {
@@ -468,9 +452,6 @@
             background: #1a365d;
             border-radius: 3px;
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #00e5ff;
-        }
     </style>
 </head>
 <body>
@@ -480,7 +461,7 @@
         <div class="modal-content">
             <h2>// ВНИМАНИЕ: СИМУЛЯТОР БЕЗОПАСНОСТИ</h2>
             <p>Это симулятор. Реальный взлом без разрешения — незаконен и преследуется по закону. Все цели, IP-адреса и базы данных в этой программе являются виртуальными тренировочными полигонами.</p>
-            <button class="modal-btn" id="accept-disclaimer-btn">ПРИНЯТЬ И ВОЙТИ</button>
+            <button class="modal-btn" id="accept-disclaimer-btn" type="button">ПРИНЯТЬ И ВОЙТИ</button>
         </div>
     </div>
 
@@ -489,7 +470,7 @@
         <div class="lesson-reader">
             <div class="lesson-header">
                 <h3 id="lesson-modal-title" style="color: #00e5ff;">Урок</h3>
-                <button class="close-modal-btn" id="close-lesson-modal">ЗАКРЫТЬ [X]</button>
+                <button class="close-modal-btn" id="close-lesson-modal" type="button">ЗАКРЫТЬ [X]</button>
             </div>
             <div class="lesson-body" id="lesson-modal-content">
                 <!-- Lesson content injected via JS -->
@@ -499,12 +480,12 @@
 
     <!-- HEADER NAVIGATION -->
     <header>
-        <div class="logo">// CYBER_OS v2.4</div>
+        <div class="logo">// CYBER_OS v2.5</div>
         <div class="nav-tabs">
-            <button class="tab-btn active" data-target="terminal-view">ТЕРМИНАЛ</button>
-            <button class="tab-btn" data-target="lessons-view">УРОКИ (<span id="lessons-count-nav">0</span>/12)</button>
-            <button class="tab-btn" data-target="missions-view">МИССИИ (<span id="missions-count-nav">0</span>/20)</button>
-            <button class="tab-btn" data-target="profile-view">ПРОФИЛЬ</button>
+            <button class="tab-btn active" data-target="terminal-view" type="button">ТЕРМИНАЛ</button>
+            <button class="tab-btn" data-target="lessons-view" type="button">УРОКИ (<span id="lessons-count-nav">0</span>/12)</button>
+            <button class="tab-btn" data-target="missions-view" type="button">МИССИИ (<span id="missions-count-nav">0</span>/20)</button>
+            <button class="tab-btn" data-target="profile-view" type="button">ПРОФИЛЬ</button>
         </div>
         <div class="user-stats-bar">
             LVL: <span id="header-lvl">1</span> | XP: <span id="header-xp">0</span>
@@ -526,18 +507,14 @@
         <!-- 2. LESSONS VIEW -->
         <div id="lessons-view" class="view-panel">
             <div class="section-title">// УЧЕБНЫЕ МОДУЛИ ПО КИБЕРБЕЗОПАСНОСТИ</div>
-            <div class="lessons-grid" id="lessons-grid">
-                <!-- Injected via JS -->
-            </div>
+            <div class="lessons-grid" id="lessons-grid"></div>
         </div>
 
         <!-- 3. MISSIONS VIEW -->
         <div id="missions-view" class="view-panel">
             <div class="section-title">// ТАКТИЧЕСКИЕ МИССИИ И ОПЕРАЦИИ</div>
             <p style="color: #a0aec0; margin-bottom: 20px; font-size: 0.9rem;">Внимание оперативник: в миссиях нет прямых указаний. Используйте команды в терминале, логику и подсказки. Награда выдается за выполнение целей.</p>
-            <div class="missions-grid" id="missions-grid">
-                <!-- Injected via JS -->
-            </div>
+            <div class="missions-grid" id="missions-grid"></div>
         </div>
 
         <!-- 4. PROFILE VIEW -->
@@ -575,15 +552,13 @@
 
                 <div class="profile-card">
                     <h3 style="color: #00e5ff; margin-bottom: 15px; font-size: 1rem;">// ДОСТИЖЕНИЯ</h3>
-                    <div id="achievements-list" style="display: flex; flex-direction: column; gap: 10px;">
-                        <!-- Injected via JS -->
-                    </div>
+                    <div id="achievements-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
                 </div>
 
                 <div class="profile-card" style="border-color: #ff3333;">
                     <h3 style="color: #ff3333; margin-bottom: 10px; font-size: 1rem;">// УПРАВЛЕНИЕ ДАННЫМИ</h3>
                     <p style="color: #a0aec0; font-size: 0.85rem; margin-bottom: 15px;">Сброс прогресса сотрет весь накопленный опыт, выполненные миссии и уроки.</p>
-                    <button class="danger-btn" id="reset-progress-btn">СБРОСИТЬ ВЕСЬ ПРОГРЕСС</button>
+                    <button class="danger-btn" id="reset-progress-btn" type="button">СБРОСИТЬ ВЕСЬ ПРОГРЕСС</button>
                 </div>
             </div>
         </div>
@@ -592,14 +567,13 @@
 
     <!-- SCRIPT ENGINE (ES5 COMPATIBLE) -->
     <script>
-        /* GLOBAL GAME STATE */
         var gameState = {
             xp: 0,
             lvl: 1,
             completedLessons: [],
             completedMissions: [],
             activeMission: null,
-            activeConnection: null, // IP or null
+            activeConnection: null,
             currentDir: "/home/root",
             history: [],
             historyIndex: -1,
@@ -652,144 +626,56 @@
             }
         };
 
-        /* 12 LESSONS DATA */
         var lessonsData = [
-            {
-                id: 1,
-                title: "1. Введение в системы",
-                desc: "Знакомство с архитектурой операционных систем и принципами работы командной строки.",
-                xp: 25,
-                content: "Операционная система управляет аппаратными ресурсами и предоставляет интерфейс для взаимодействия. В кибербезопасности ключевым инструментом является командная строка (Shell), позволяющая напрямую взаимодействовать с ядром и файлами.\n\nОсновные команды:\n- ls: просмотр файлов\n- pwd: текущая директория\n- whoami: информация о пользователе",
-                task: "Введите команду 'whoami' или 'pwd' в терминале."
-            },
-            {
-                id: 2,
-                title: "2. IP-адреса и порты",
-                desc: "Изучение сетевой идентификации, сетевых узлов и портов подключения.",
-                xp: 30,
-                content: "Каждое устройство в сети имеет IP-адрес (например, 192.168.1.1). Порты — это логические каналы связи (от 0 до 65535). Например, порт 22 используется для SSH, порт 80 для HTTP, а 443 для HTTPS.\n\nИнструменты:\n- ping: проверка доступности узла\n- nmap: сканирование открытых портов",
-                task: "Проверьте соединение с помощью команды 'ping 127.0.0.1'."
-            },
-            {
-                id: 3,
-                title: "3. Файловая система",
-                desc: "Навигация по иерархии папок, чтение и поиск файлов.",
-                xp: 30,
-                content: "В Linux всё является файлом. Файловая система имеет древовидную структуру, начиная с корневого каталога '/'.\n\nКоманды:\n- cd <папка>: смена директории\n- cat <файл>: чтение файла\n- find <имя>: поиск файла",
-                task: "Перейдите в папку /etc и прочитайте файл hosts."
-            },
-            {
-                id: 4,
-                title: "4. Шифрование",
-                desc: "Основы криптографии, кодирование Base64 и хеширование.",
-                xp: 35,
-                content: "Шифрование защищает конфиденциальность данных. Кодирование Base64 преобразует байты в текст (не является шифрованием!). Хеширование (MD5, SHA) создает необратимый цифровой отпечаток.\n\nКоманды:\n- base64 <текст/файл>\n- hash <текст>\n- encrypt / decrypt",
-                task: "Закодируйте или расшифруйте строку с помощью команды base64."
-            },
-            {
-                id: 5,
-                title: "5. Сети и подключения",
-                desc: "Удаленный доступ, сетевые интерфейсы и маршрутизация.",
-                xp: 35,
-                content: "Сетевые утилиты позволяют анализировать трафик и устанавливать защищенные соединения с удаленными серверами.\n\nКоманды:\n- ifconfig / ip: сетевые интерфейсы\n- netstat: активные соединения\n- traceroute: маршрут пакетов\n- connect / ssh: подключение",
-                task: "Используйте 'ifconfig' или 'netstat' в терминале."
-            },
-            {
-                id: 6,
-                title: "6. Уязвимости",
-                desc: "Поиск слабых мест в конфигурации и программном обеспечении.",
-                xp: 40,
-                content: "Уязвимость — это ошибка в системе безопасности. Специалисты сканируют цели для их обнаружения до того, как это сделают злоумышленники.\n\nКоманды:\n- scan: сканирование уязвимостей на узле",
-                task: "Выполните команду 'scan 192.168.1.10'."
-            },
-            {
-                id: 7,
-                title: "7. Терминал Linux",
-                desc: "Продвинутые приемы работы: фильтрация текста, история и переменные.",
-                xp: 30,
-                content: "Эффективное использование терминала ускоряет поиск и анализ информации.\n\nКоманды:\n- grep <шаблон> <файл>: поиск текста\n- history: история команд\n- clear: очистка экрана",
-                task: "Посмотрите историю введенных команд с помощью 'history'."
-            },
-            {
-                id: 8,
-                title: "8. Права доступа",
-                desc: "Модель прав пользователей и привилегии суперпользователя (root/sudo).",
-                xp: 40,
-                content: "В системах Linux разграничиваются права чтения (r), записи (w) и выполнения (x) для владельца, группы и остальных.\n\nКоманды:\n- whoami\n- sudo: выполнение от имени суперпользователя",
-                task: "Используйте 'sudo' для повышения прав в системе."
-            },
-            {
-                id: 9,
-                title: "9. Процессы",
-                desc: "Мониторинг запущенных программ и управление системными задачами.",
-                xp: 35,
-                content: "Каждая программа в ОС работает как процесс со своим PID (идентификатором).\n\nКоманды:\n- ps: список процессов\n- kill <PID>: завершение процесса",
-                task: "Выведите список процессов с помощью 'ps'."
-            },
-            {
-                id: 10,
-                title: "10. Логи и мониторинг",
-                desc: "Анализ системных журналов для обнаружения вторжений и сбоев.",
-                xp: 40,
-                content: "Журналы (логи) фиксируют все события в системе — от успешных входов до попыток взлома.\n\nПути:\n- /var/log/auth.log\n- /var/log/syslog",
-                task: "Прочитайте лог авторизации в /var/log/auth.log."
-            },
-            {
-                id: 11,
-                title: "11. Веб-технологии",
-                desc: "Взаимодействие с веб-серверами и протокол HTTP.",
-                xp: 35,
-                content: "Веб-приложения обрабатывают запросы пользователей. Для тестирования API и сайтов используются специальные запросы.\n\nКоманды:\n- curl <url>: отправка HTTP-запроса",
-                task: "Отправьте запрос с помощью 'curl http://localhost'."
-            },
-            {
-                id: 12,
-                title: "12. Социальная инженерия",
-                desc: "Психологические аспекты кибербезопасности и защита от манипуляций.",
-                xp: 40,
-                content: "Человеческий фактор — самое слабое звено в безопасности. Фишинг, поддельные письма и обман позволяют получить доступ в обход технических средств защиты.",
-                task: "Ознакомьтесь с основами защиты от фишинга и завершите курс."
-            }
+            { id: 1, title: "1. Введение в системы", desc: "Знакомство с архитектурой ОС и командной строкой.", xp: 25, content: "ОС управляет ресурсами и предоставляет Shell.\n\nКоманды:\n- ls: просмотр файлов\n- pwd: текущая директория\n- whoami: имя пользователя", task: "Введите 'whoami' в терминале." },
+            { id: 2, title: "2. IP-адреса и порты", desc: "Изучение сетевой идентификации и портов.", xp: 30, content: "IP идентифицирует узел. Порты служат каналами связи (SSH 22, HTTP 80).\n\nУтилиты:\n- ping\n- nmap", task: "Проверьте пинг 'ping 127.0.0.1'." },
+            { id: 3, title: "3. Файловая система", desc: "Навигация по иерархии папок и чтение файлов.", xp: 30, content: "Файлы образуют древовидную структуру от '/'.\n\nКоманды:\n- cd\n- cat\n- find", task: "Перейдите в /etc и прочитайте hosts." },
+            { id: 4, title: "4. Шифрование", desc: "Основы криптографии и Base64.", xp: 35, content: "Шифрование защищает данные от перехвата.\n\nКоманды:\n- base64\n- hash\n- decrypt", task: "Используйте base64 для кодирования." },
+            { id: 5, title: "5. Сети и подключения", desc: "Удаленный доступ и интерфейсы.", xp: 35, content: "Сетевой мониторинг и соединения.\n\nКоманды:\n- ifconfig\n- netstat\n- traceroute", task: "Выведите сетевые интерфейсы 'ifconfig'." },
+            { id: 6, title: "6. Уязвимости", desc: "Поиск слабых мест и эксплойтов.", xp: 40, content: "Уязвимости позволяют обойти защиту.\n\nКоманды:\n- scan", task: "Запустите сканер 'scan 10.0.4.55'." },
+            { id: 7, title: "7. Терминал Linux", desc: "Продвинутая фильтрация и история.", xp: 30, content: "Утилиты поиска и вывода истории.\n\nКоманды:\n- grep\n- history\n- clear", task: "Проверьте историю 'history'." },
+            { id: 8, title: "8. Права доступа", desc: "Модель прав и привилегии root.", xp: 40, content: "Разграничение чтения, записи и выполнения.\n\nКоманды:\n- sudo", task: "Используйте 'sudo' для повышения прав." },
+            { id: 9, title: "9. Процессы", desc: "Мониторинг запущенных программ.", xp: 35, content: "Управление задачами через PID.\n\nКоманды:\n- ps\n- kill", task: "Выведите список процессов 'ps'." },
+            { id: 10, title: "10. Логи и мониторинг", desc: "Анализ журналов системы.", xp: 40, content: "Логи фиксируют события в /var/log/.", task: "Прочитайте лог авторизации auth.log." },
+            { id: 11, title: "11. Веб-технологии", desc: "HTTP-запросы и веб-серверы.", xp: 35, content: "Взаимодействие с веб-приложениями.\n\nКоманды:\n- curl", task: "Выполните запрос 'curl http://localhost'." },
+            { id: 12, title: "12. Социальная инженерия", desc: "Психологические аспекты защиты.", xp: 40, content: "Защита от фишинга и манипуляций.", task: "Изучите основы безопасности." }
         ];
 
-        /* 20 MISSIONS DATA (NO SPOON-FED COMMANDS) */
         var missionsData = [
-            { id: 1, title: "1. Разведка на местности", desc: "Подключитесь к локальному шлюзу и осмотрите текущее окружение.", xp: 35, target: "connect" },
-            { id: 2, title: "2. Поиск улик", desc: "Найдите файл с планом задач в домашней директории.", xp: 40, target: "cat_todo" },
-            { id: 3, title: "3. Секретный файл", desc: "Обнаружьте и прочитайте скрытый флаг в системе.", xp: 45, target: "cat_flag" },
-            { id: 4, title: "4. Расшифровка бэкапа", desc: "Расшифруйте перехваченный файл в папке /tmp.", xp: 50, target: "decrypt" },
-            { id: 5, title: "5. Взлом пароля", desc: "Подберите пароль к базе данных методом перебора.", xp: 55, target: "brute" },
-            { id: 6, title: "6. Сканирование портов", desc: "Просканируйте корпоративный сервер на наличие открытых портов.", xp: 40, target: "nmap" },
-            { id: 7, title: "7. Авторизация", desc: "Войдите в систему под учетной записью администратора.", xp: 50, target: "login" },
-            { id: 8, title: "8. Аудит уязвимостей", desc: "Запустите сканер уязвимостей на целевом IP.", xp: 45, target: "scan" },
-            { id: 9, title: "9. Обход защиты", desc: "Установите защищенное SSH-соединение с удаленным узлом.", xp: 60, target: "ssh" },
-            { id: 10, title: "10. Поиск информации", desc: "Найдите упоминание базы данных в файле конфигурации hosts.", xp: 40, target: "grep" },
-            { id: 11, title: "11. Анализ трафика", desc: "Исследуйте системный лог на предмет сетевых атак.", xp: 50, target: "cat_syslog" },
-            { id: 12, title: "12. Повышение привилегий", desc: "Получите права суперпользователя в системе.", xp: 65, target: "sudo" },
-            { id: 13, title: "13. Мониторинг процессов", desc: "Проверьте запущенные процессы в операционной системе.", xp: 35, target: "ps" },
-            { id: 14, title: "14. Хеширование", desc: "Создайте криптографический хеш для контрольной проверки.", xp: 40, target: "hash" },
-            { id: 15, title: "15. Защищенный узел", desc: "Успешно подключитесь к защищенному серверу по внешнему IP.", xp: 70, target: "connect_secure" },
-            { id: 16, title: "16. Анализ паролей", desc: "Изучите файл с учетными записями в системной директории etc.", xp: 45, target: "cat_passwd" },
-            { id: 17, title: "17. Веб-запрос", desc: "Выполните тестовый HTTP-запрос к локальному веб-серверу.", xp: 40, target: "curl" },
-            { id: 18, title: "18. Кодирование данных", desc: "Закодируйте текстовую строку в формат Base64.", xp: 35, target: "base64" },
-            { id: 19, title: "19. Трассировка сети", desc: "Проложите маршрут пакетов до целевого сервера.", xp: 50, target: "traceroute" },
-            { id: 20, title: "20. Фиксация победы", desc: "Изучите историю команд и подготовьте отчет о прохождении тренажера.", xp: 80, target: "history" }
+            { id: 1, title: "1. Разведка на местности", desc: "Подключитесь к локальному шлюзу.", xp: 35, target: "connect" },
+            { id: 2, title: "2. Поиск улик", desc: "Найдите план задач в каталоге.", xp: 40, target: "cat_todo" },
+            { id: 3, title: "3. Секретный файл", desc: "Найдите и прочитайте секретный флаг.", xp: 45, target: "cat_flag" },
+            { id: 4, title: "4. Расшифровка бэкапа", desc: "Расшифруйте перехваченный файл в /tmp.", xp: 50, target: "decrypt" },
+            { id: 5, title: "5. Взлом пароля", desc: "Подберите пароль методом перебора.", xp: 55, target: "brute" },
+            { id: 6, title: "6. Сканирование портов", desc: "Просканируйте сервер на открытые порты.", xp: 40, target: "nmap" },
+            { id: 7, title: "7. Авторизация", desc: "Войдите под администратором.", xp: 50, target: "login" },
+            { id: 8, title: "8. Аудит уязвимостей", desc: "Запустите сканер уязвимостей.", xp: 45, target: "scan" },
+            { id: 9, title: "9. Обход защиты", desc: "Установите безопасное соединение.", xp: 60, target: "ssh" },
+            { id: 10, title: "10. Поиск информации", desc: "Найдите конфигурацию хостов.", xp: 40, target: "grep" },
+            { id: 11, title: "11. Анализ трафика", desc: "Исследуйте системный лог.", xp: 50, target: "cat_syslog" },
+            { id: 12, title: "12. Повышение привилегий", desc: "Получите права суперпользователя.", xp: 65, target: "sudo" },
+            { id: 13, title: "13. Мониторинг процессов", desc: "Проверьте запущенные задачи.", xp: 35, target: "ps" },
+            { id: 14, title: "14. Хеширование", desc: "Создайте криптографический хеш.", xp: 40, target: "hash" },
+            { id: 15, title: "15. Защищенный узел", desc: "Подключитесь к защищенному серверу.", xp: 70, target: "connect_secure" },
+            { id: 16, title: "16. Анализ паролей", desc: "Изучите файл учетных записей.", xp: 45, target: "cat_passwd" },
+            { id: 17, title: "17. Веб-запрос", desc: "Выполните тестовый HTTP-запрос.", xp: 40, target: "curl" },
+            { id: 18, title: "18. Кодирование данных", desc: "Закодируйте строку в Base64.", xp: 35, target: "base64" },
+            { id: 19, title: "19. Трассировка сети", desc: "Проложите маршрут пакетов.", xp: 50, target: "traceroute" },
+            { id: 20, title: "20. Фиксация победы", desc: "Изучите историю команд.", xp: 80, target: "history" }
         ];
 
-        /* ACHIEVEMENTS DEFINITIONS */
         var achievementsDef = [
-            { id: "first_cmd", title: "Первый шаг", desc: "Введите свою первую команду в терминале", unlocked: false },
+            { id: "first_cmd", title: "Первый шаг", desc: "Введите первую команду в терминале", unlocked: false },
             { id: "student", title: "Студент академии", desc: "Пройдите не менее 3 уроков", unlocked: false },
             { id: "hacker_novice", title: "Начинающий хакер", desc: "Выполните 5 миссий", unlocked: false },
-            { id: "crypto_master", title: "Криптограф", desc: "Используйте команды шифрования или хеширования", unlocked: false },
-            { id: "root_access", title: "Властелин системы", desc: "Получите права суперпользователя (sudo)", unlocked: false },
+            { id: "crypto_master", title: "Криптограф", desc: "Используйте шифрование или хеширование", unlocked: false },
+            { id: "root_access", title: "Властелин системы", desc: "Получите права root (sudo)", unlocked: false },
             { id: "elite", title: "Элита кибербезопасности", desc: "Достигните 5 уровня", unlocked: false }
         ];
 
-        /* LOCALSTORAGE PERSISTENCE */
         function loadGameData() {
             try {
-                var saved = localStorage.getItem("cyber_sim_save_v2");
+                var saved = localStorage.getItem("cyber_sim_save_v3");
                 if (saved) {
                     var data = JSON.parse(saved);
                     gameState.xp = data.xp || 0;
@@ -813,7 +699,7 @@
 
         function saveGameData() {
             try {
-                localStorage.setItem("cyber_sim_save_v2", JSON.stringify({
+                localStorage.setItem("cyber_sim_save_v3", JSON.stringify({
                     xp: gameState.xp,
                     lvl: gameState.lvl,
                     completedLessons: gameState.completedLessons,
@@ -825,7 +711,6 @@
             }
         }
 
-        /* ADD XP & LEVEL CHECK */
         function addXP(amount) {
             gameState.xp += amount;
             var nextLevelXP = gameState.lvl * 100;
@@ -839,7 +724,6 @@
             saveGameData();
         }
 
-        /* CHECK ACHIEVEMENTS */
         function checkAchievement(id) {
             for (var i = 0; i < achievementsDef.length; i++) {
                 if (achievementsDef[i].id === id && !achievementsDef[i].unlocked) {
@@ -852,7 +736,6 @@
             }
         }
 
-        /* CHECK MISSION COMPLETION TRIGGER */
         function checkMissionTrigger(actionKey) {
             for (var i = 0; i < missionsData.length; i++) {
                 var m = missionsData[i];
@@ -871,41 +754,48 @@
                         if (gameState.completedMissions.length >= 5) {
                             checkAchievement("hacker_novice");
                         }
-                        updateMissionsView();
+                        renderMissions();
                         updateHeaderStats();
                     }
                 }
             }
         }
 
-        /* INITIALIZATION & DOM BINDING */
-        window.addEventListener("DOMContentLoaded", function () {
+        /* SAFE INITIALIZATION */
+        window.onload = function () {
             loadGameData();
             updateHeaderStats();
             renderLessons();
             renderMissions();
             updateProfileView();
 
-            // Disclaimer Modal
-            var disclaimerModal = document.getElementById("disclaimer-modal");
+            // Disclaimer Button Handler
             var acceptBtn = document.getElementById("accept-disclaimer-btn");
-            acceptBtn.addEventListener("click", function () {
-                disclaimerModal.style.display = "none";
-                printTerminal("CYBER_OS v2.4 запущен успешно.", "t-success");
-                printTerminal("Введите 'help' для просмотра списка доступных команд.", "t-info");
-                printTerminal("--------------------------------------------------", "t-dim");
-            });
+            if (acceptBtn) {
+                acceptBtn.onclick = function () {
+                    var modal = document.getElementById("disclaimer-modal");
+                    if (modal) {
+                        modal.style.display = "none";
+                    }
+                    printTerminal("CYBER_OS v2.5 запущен успешно.", "t-success");
+                    printTerminal("Введите 'help' для просмотра списка доступных команд.", "t-info");
+                    printTerminal("--------------------------------------------------", "t-dim");
+                    var termInput = document.getElementById("terminal-input");
+                    if (termInput) termInput.focus();
+                };
+            }
 
             // Navigation Tabs
             var tabButtons = document.querySelectorAll(".tab-btn");
             for (var i = 0; i < tabButtons.length; i++) {
-                tabButtons[i].addEventListener("click", function () {
+                tabButtons[i].onclick = function () {
                     var targetId = this.getAttribute("data-target");
                     var panels = document.querySelectorAll(".view-panel");
                     for (var p = 0; p < panels.length; p++) {
                         panels[p].classList.remove("active");
                     }
-                    document.getElementById(targetId).classList.add("active");
+                    var targetPanel = document.getElementById(targetId);
+                    if (targetPanel) targetPanel.classList.add("active");
 
                     for (var t = 0; t < tabButtons.length; t++) {
                         tabButtons[t].classList.remove("active");
@@ -913,69 +803,79 @@
                     this.classList.add("active");
 
                     if (targetId === "terminal-view") {
-                        document.getElementById("terminal-input").focus();
+                        var termInput = document.getElementById("terminal-input");
+                        if (termInput) termInput.focus();
                     }
-                });
+                };
             }
 
             // Terminal Input Handler
             var termInput = document.getElementById("terminal-input");
-            termInput.addEventListener("keydown", function (e) {
-                if (e.key === "Enter" || e.keyCode === 13) {
-                    var cmdLine = termInput.value.trim();
-                    termInput.value = "";
-                    if (cmdLine !== "") {
-                        gameState.history.push(cmdLine);
-                        gameState.historyIndex = gameState.history.length;
-                        printTerminal("root@cyber-sec:~# " + cmdLine, "t-dim");
-                        processCommand(cmdLine);
-                        checkAchievement("first_cmd");
-                    }
-                } else if (e.key === "ArrowUp" || e.keyCode === 38) {
-                    if (gameState.history.length > 0 && gameState.historyIndex > 0) {
-                        gameState.historyIndex--;
-                        termInput.value = gameState.history[gameState.historyIndex];
-                    }
-                } else if (e.key === "ArrowDown" || e.keyCode === 40) {
-                    if (gameState.history.length > 0 && gameState.historyIndex < gameState.history.length - 1) {
-                        gameState.historyIndex++;
-                        termInput.value = gameState.history[gameState.historyIndex];
-                    } else {
-                        gameState.historyIndex = gameState.history.length;
+            if (termInput) {
+                termInput.onkeydown = function (e) {
+                    var keyCode = e.keyCode || e.which;
+                    if (keyCode === 13) {
+                        var cmdLine = termInput.value.trim();
                         termInput.value = "";
+                        if (cmdLine !== "") {
+                            gameState.history.push(cmdLine);
+                            gameState.historyIndex = gameState.history.length;
+                            printTerminal("root@cyber-sec:~# " + cmdLine, "t-dim");
+                            processCommand(cmdLine);
+                            checkAchievement("first_cmd");
+                        }
+                    } else if (keyCode === 38) {
+                        if (gameState.history.length > 0 && gameState.historyIndex > 0) {
+                            gameState.historyIndex--;
+                            termInput.value = gameState.history[gameState.historyIndex];
+                        }
+                    } else if (keyCode === 40) {
+                        if (gameState.history.length > 0 && gameState.historyIndex < gameState.history.length - 1) {
+                            gameState.historyIndex++;
+                            termInput.value = gameState.history[gameState.historyIndex];
+                        } else {
+                            gameState.historyIndex = gameState.history.length;
+                            termInput.value = "";
+                        }
                     }
-                }
-            });
+                };
+            }
 
             // Lesson Modal Close
-            document.getElementById("close-lesson-modal").addEventListener("click", function () {
-                document.getElementById("lesson-modal").style.display = "none";
-            });
+            var closeLessonBtn = document.getElementById("close-lesson-modal");
+            if (closeLessonBtn) {
+                closeLessonBtn.onclick = function () {
+                    var lessonModal = document.getElementById("lesson-modal");
+                    if (lessonModal) lessonModal.style.display = "none";
+                };
+            }
 
             // Reset Progress Button
-            document.getElementById("reset-progress-btn").addEventListener("click", function () {
-                if (confirm("Вы уверены, что хотите сбросить весь прогресс?")) {
-                    localStorage.removeItem("cyber_sim_save_v2");
-                    gameState.xp = 0;
-                    gameState.lvl = 1;
-                    gameState.completedLessons = [];
-                    gameState.completedMissions = [];
-                    for (var i = 0; i < achievementsDef.length; i++) {
-                        achievementsDef[i].unlocked = false;
+            var resetBtn = document.getElementById("reset-progress-btn");
+            if (resetBtn) {
+                resetBtn.onclick = function () {
+                    if (confirm("Вы уверены, что хотите сбросить весь прогресс?")) {
+                        localStorage.removeItem("cyber_sim_save_v3");
+                        gameState.xp = 0;
+                        gameState.lvl = 1;
+                        gameState.completedLessons = [];
+                        gameState.completedMissions = [];
+                        for (var i = 0; i < achievementsDef.length; i++) {
+                            achievementsDef[i].unlocked = false;
+                        }
+                        updateHeaderStats();
+                        renderLessons();
+                        renderMissions();
+                        updateProfileView();
+                        printTerminal("Прогресс успешно сброшен.", "t-warning");
                     }
-                    updateHeaderStats();
-                    renderLessons();
-                    renderMissions();
-                    updateProfileView();
-                    printTerminal("Прогресс успешно сброшен.", "t-warning");
-                    alert("Прогресс сброшен!");
-                }
-            });
-        });
+                };
+            }
+        };
 
-        /* TERMINAL PRINT HELPER */
         function printTerminal(text, className) {
             var output = document.getElementById("terminal-output");
+            if (!output) return;
             var line = document.createElement("div");
             line.className = "terminal-line " + (className || "");
             line.textContent = text;
@@ -983,7 +883,6 @@
             output.scrollTop = output.scrollHeight;
         }
 
-        /* RESOLVE PATH HELPER */
         function resolvePath(pathStr) {
             if (!pathStr) return gameState.currentDir;
             var target = pathStr;
@@ -1020,7 +919,6 @@
             return current;
         }
 
-        /* COMMAND PROCESSOR (30+ COMMANDS) */
         function processCommand(fullCmd) {
             var parts = fullCmd.split(" ");
             var cmd = parts[0].toLowerCase();
@@ -1030,38 +928,38 @@
                 case "help":
                     printTerminal("Доступные команды в CYBER_OS:", "t-info");
                     printTerminal("  help           - список команд");
-                    printTerminal("  ls             - показать файлы в текущей папке");
+                    printTerminal("  ls             - показать файлы");
                     printTerminal("  cd <путь>      - перейти в папку");
-                    printTerminal("  cat <файл>     - прочитать содержимое файла");
-                    printTerminal("  pwd            - текущая рабочая папка");
-                    printTerminal("  whoami         - текущий пользователь");
-                    printTerminal("  clear          - очистить экран терминала");
-                    printTerminal("  ping <ip>      - проверить сетевое соединение");
-                    printTerminal("  nmap <ip>      - сканировать порты узла");
-                    printTerminal("  scan <ip>      - сканировать уязвимости системы");
-                    printTerminal("  connect <ip>   - подключиться к удаленному серверу");
-                    printTerminal("  ssh <user@ip>  - безопасное SSH-подключение");
+                    printTerminal("  cat <файл>     - прочитать файл");
+                    printTerminal("  pwd            - текущая папка");
+                    printTerminal("  whoami         - имя пользователя");
+                    printTerminal("  clear          - очистить экран");
+                    printTerminal("  ping <ip>      - проверить соединение");
+                    printTerminal("  nmap <ip>      - сканировать порты");
+                    printTerminal("  scan <ip>      - сканировать уязвимости");
+                    printTerminal("  connect <ip>   - подключиться к серверу");
+                    printTerminal("  ssh <user@ip>  - SSH-подключение");
                     printTerminal("  decrypt <file> - расшифровать файл");
                     printTerminal("  encrypt <file> - зашифровать файл");
-                    printTerminal("  brute <target> - подобрать пароль (Brute-force)");
-                    printTerminal("  login <user>   - войти под учетной записью");
-                    printTerminal("  sudo <cmd>     - выполнить команду с правами root");
+                    printTerminal("  brute <target> - подобрать пароль");
+                    printTerminal("  login <user>   - войти в систему");
+                    printTerminal("  sudo <cmd>     - повысить права до root");
                     printTerminal("  grep <term> <f>- поиск текста в файлах");
-                    printTerminal("  find <name>    - найти файл в системе");
-                    printTerminal("  ps             - список запущенных процессов");
-                    printTerminal("  kill <pid>     - завершить процесс по PID");
-                    printTerminal("  curl <url>     - выполнить HTTP-запрос");
-                    printTerminal("  base64 <txt>   - кодировать / декодировать base64");
-                    printTerminal("  hash <txt>     - создать хеш (SHA-256)");
-                    printTerminal("  history        - история введенных команд");
-                    printTerminal("  echo <text>    - вывести текст на экран");
-                    printTerminal("  date           - текущая дата и системное время");
-                    printTerminal("  uname          - информация об операционной системе");
-                    printTerminal("  ifconfig       - сетевые интерфейсы и IP");
-                    printTerminal("  netstat        - активные сетевые соединения");
-                    printTerminal("  traceroute     - трассировка маршрута пакетов");
-                    printTerminal("  missions       - список активных миссий");
-                    printTerminal("  hint           - получить подсказку (тратит 10 XP)");
+                    printTerminal("  find <name>    - найти файл");
+                    printTerminal("  ps             - список процессов");
+                    printTerminal("  kill <pid>     - убить процесс");
+                    printTerminal("  curl <url>     - HTTP-запрос");
+                    printTerminal("  base64 <txt>   - кодирование base64");
+                    printTerminal("  hash <txt>     - хеширование");
+                    printTerminal("  history        - история команд");
+                    printTerminal("  echo <text>    - вывести текст");
+                    printTerminal("  date           - дата и время");
+                    printTerminal("  uname          - информация о системе");
+                    printTerminal("  ifconfig       - сетевые интерфейсы");
+                    printTerminal("  netstat        - активные соединения");
+                    printTerminal("  traceroute     - маршрут до сервера");
+                    printTerminal("  missions       - список миссий");
+                    printTerminal("  hint           - подсказка (тратит 10 XP)");
                     break;
 
                 case "ls":
@@ -1107,41 +1005,36 @@
                     break;
 
                 case "clear":
-                    document.getElementById("terminal-output").innerHTML = "";
+                    var output = document.getElementById("terminal-output");
+                    if (output) output.innerHTML = "";
                     break;
 
                 case "ping":
-                    if (!args[0]) {
-                        printTerminal("Использование: ping <ip или хост>", "t-warning");
-                        break;
-                    }
-                    printTerminal("PING " + args[0] + " (56 octets of data):");
-                    printTerminal("64 bytes from " + args[0] + ": icmp_seq=1 ttl=64 time=0.421 ms", "t-success");
-                    printTerminal("64 bytes from " + args[0] + ": icmp_seq=2 ttl=64 time=0.389 ms", "t-success");
-                    printTerminal("--- " + args[0] + " ping statistics ---");
+                    var pTarget = args[0] || "127.0.0.1";
+                    printTerminal("PING " + pTarget + " (56 octets of data):");
+                    printTerminal("64 bytes from " + pTarget + ": icmp_seq=1 ttl=64 time=0.421 ms", "t-success");
+                    printTerminal("64 bytes from " + pTarget + ": icmp_seq=2 ttl=64 time=0.389 ms", "t-success");
+                    printTerminal("--- " + pTarget + " ping statistics ---");
                     printTerminal("2 packets transmitted, 2 received, 0% packet loss", "t-success");
                     break;
 
                 case "nmap":
                     var targetIP = args[0] || "192.168.1.10";
-                    printTerminal("Starting Nmap scan ( https://nmap.org ) at 2026-10-16 20:29 MSK", "t-info");
-                    printTerminal("Nmap scan report for " + targetIP);
-                    printTerminal("Host is up (0.00032s latency).");
+                    printTerminal("Starting Nmap scan for " + targetIP, "t-info");
                     printTerminal("PORT     STATE SERVICE");
                     printTerminal("21/tcp   open  ftp");
                     printTerminal("22/tcp   open  ssh");
                     printTerminal("80/tcp   open  http");
                     printTerminal("3306/tcp open  mysql", "t-warning");
-                    printTerminal("Nmap done: 1 IP address (1 host up) scanned in 0.23 seconds");
+                    printTerminal("Nmap done: 1 IP address scanned.");
                     checkMissionTrigger("nmap");
                     break;
 
                 case "scan":
                     var sTarget = args[0] || "10.0.4.55";
-                    printTerminal("Инициализация сканирования уязвимостей на " + sTarget + "...", "t-info");
+                    printTerminal("Сканирование уязвимостей на " + sTarget + "...", "t-info");
                     printTerminal("[+] Обнаружена уязвимость CVE-2026-9912: Weak Auth Bypass", "t-warning");
-                    printTerminal("[+] Обнаружен устаревший демон OpenSSH 7.2", "t-warning");
-                    printTerminal("Сканирование завершено. Уязвимости найдены.", "t-success");
+                    printTerminal("Сканирование завершено.", "t-success");
                     checkMissionTrigger("scan");
                     break;
 
@@ -1151,7 +1044,7 @@
                         break;
                     }
                     gameState.activeConnection = args[0];
-                    printTerminal("Успешное сетевое соединение с узлом " + args[0] + " установленно.", "t-success");
+                    printTerminal("Соединение с узлом " + args[0] + " установлено.", "t-success");
                     checkMissionTrigger("connect");
                     if (args[0].indexOf("172.") === 0 || args[0].indexOf("secure") !== -1) {
                         checkMissionTrigger("connect_secure");
@@ -1163,9 +1056,7 @@
                         printTerminal("Использование: ssh user@ip", "t-warning");
                         break;
                     }
-                    printTerminal("Connecting to " + args[0] + "...");
-                    printTerminal("The authenticity of host can't be established.");
-                    printTerminal("ECDSA key fingerprint is SHA256:Su891aK2L10... Connected.", "t-success");
+                    printTerminal("Connecting to " + args[0] + " via SSH... Connected.", "t-success");
                     checkMissionTrigger("ssh");
                     break;
 
@@ -1188,7 +1079,6 @@
 
                 case "decrypt":
                     printTerminal("[*] Запуск расшифрования файла AES-256...", "t-info");
-                    printTerminal("[+] Ключ успешно подобран по словарю.");
                     printTerminal("Расшифрованное содержимое: FLAG{DECRYPT_SUCCESS_9812}", "t-success");
                     checkMissionTrigger("decrypt");
                     checkAchievement("crypto_master");
@@ -1200,10 +1090,7 @@
                     break;
 
                 case "brute":
-                    printTerminal("[*] Запуск подбора пароля (Brute-force) для базы данных...", "t-info");
-                    printTerminal("[+] Попытка 1/100: admin:123456 [FAIL]");
-                    printTerminal("[+] Попытка 42/100: root:password [FAIL]");
-                    printTerminal("[+] Попытка 89/100: db_admin:cyber_secret_99 [SUCCESS]", "t-success");
+                    printTerminal("[*] Запуск подбора пароля (Brute-force)...", "t-info");
                     printTerminal("Пароль найден: cyber_secret_99", "t-success");
                     checkMissionTrigger("brute");
                     break;
@@ -1218,28 +1105,19 @@
                     break;
 
                 case "sudo":
-                    if (args.length === 0) {
-                        printTerminal("Использование: sudo <команда>", "t-warning");
-                        break;
-                    }
-                    printTerminal("[sudo] пароль для root: ");
                     printTerminal("Права суперпользователя подтверждены.", "t-success");
                     checkAchievement("root_access");
                     checkMissionTrigger("sudo");
                     break;
 
                 case "grep":
-                    if (args.length < 2) {
-                        printTerminal("Использование: grep <термин> <файл>", "t-warning");
-                        break;
-                    }
-                    printTerminal("Найденные совпадения для '" + args[0] + "':");
+                    printTerminal("Найденные совпадения для '" + (args[0] || "") + "':");
                     printTerminal("10.0.4.55 corp-db.internal", "t-success");
                     checkMissionTrigger("grep");
                     break;
 
                 case "find":
-                    printTerminal("Поиск файла '" + (args[0] || "*") + "' в системе...");
+                    printTerminal("Поиск файлов в системе:");
                     printTerminal("/home/root/flag.txt", "t-success");
                     printTerminal("/etc/passwd", "t-success");
                     break;
@@ -1247,7 +1125,6 @@
                 case "ps":
                     printTerminal("PID  TTY          TIME CMD");
                     printTerminal("  1  ?        00:00:02 systemd");
-                    printTerminal(" 45  ?        00:00:00 sshd");
                     printTerminal("102  pts/0    00:00:01 bash");
                     printTerminal("309  pts/0    00:00:00 cyber_sim", "t-success");
                     checkMissionTrigger("ps");
@@ -1262,16 +1139,12 @@
                     break;
 
                 case "curl":
-                    var url = args[0] || "http://localhost";
                     printTerminal("HTTP/1.1 200 OK");
-                    printTerminal("Server: nginx/1.18.0");
-                    printTerminal("Content-Type: text/html; charset=UTF-8");
                     printTerminal("<!DOCTYPE html><html><body><h1>CYBER_SERVER ACTIVE</h1></body></html>", "t-success");
                     checkMissionTrigger("curl");
                     break;
 
                 case "base64":
-                    var textToEncode = args.slice(1).join(" ") || "CYBER_SEC";
                     printTerminal("Результат base64: Q1lCRVJfU0VD", "t-success");
                     checkMissionTrigger("base64");
                     checkAchievement("crypto_master");
@@ -1300,27 +1173,20 @@
                     break;
 
                 case "uname":
-                    printTerminal("Linux cyber-sec 5.4.0-77-generic #86-Ubuntu SMP x86_64 GNU/Linux");
+                    printTerminal("Linux cyber-sec 5.4.0-77-generic x86_64 GNU/Linux");
                     break;
 
                 case "ifconfig":
-                    printTerminal("eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST> mtu 1500");
-                    printTerminal("        inet 192.168.1.50  netmask 255.255.255.0  broadcast 192.168.1.255");
-                    printTerminal("        RX packets 4219  bytes 314159 (314.1 KB)");
+                    printTerminal("eth0: inet 192.168.1.50  netmask 255.255.255.0");
                     break;
 
                 case "netstat":
-                    printTerminal("Active Internet connections (w/o servers)");
-                    printTerminal("Proto Recv-Q Send-Q Local Address           Foreign Address         State");
-                    printTerminal("tcp        0      0 192.168.1.50:44122      192.168.1.10:22         ESTABLISHED");
-                    printTerminal("tcp        0      0 127.0.0.1:80            127.0.0.1:49210         TIME_WAIT");
+                    printTerminal("Active Internet connections: tcp 192.168.1.50:44122 ESTABLISHED");
                     break;
 
                 case "traceroute":
-                    printTerminal("traceroute to target (10.0.4.55), 30 hops max");
                     printTerminal(" 1  gateway.local (192.168.1.1)  0.412 ms");
-                    printTerminal(" 2  corp-router.internal (10.0.0.1)  1.214 ms");
-                    printTerminal(" 3  corp-db.internal (10.0.4.55)  2.051 ms", "t-success");
+                    printTerminal(" 2  corp-db.internal (10.0.4.55)  2.051 ms", "t-success");
                     checkMissionTrigger("traceroute");
                     break;
 
@@ -1332,8 +1198,7 @@
                         for (var d = 0; d < gameState.completedMissions.length; d++) {
                             if (gameState.completedMissions[d] === mis.id) done = true;
                         }
-                        var statusStr = done ? "[ВЫПОЛНЕНО]" : "[АКТИВНО]";
-                        printTerminal("  " + mis.id + ". " + mis.title + " " + statusStr);
+                        printTerminal("  " + mis.id + ". " + mis.title + " " + (done ? "[ВЫПОЛНЕНО]" : "[АКТИВНО]"));
                     }
                     break;
 
@@ -1342,9 +1207,9 @@
                         gameState.xp -= 10;
                         updateHeaderStats();
                         updateProfileView();
-                        printTerminal("ПОДСКАЗКА: Внимательно читайте описания миссий. Используйте команды 'nmap', 'connect', 'scan', 'cat' или 'brute'.", "t-warning");
+                        printTerminal("ПОДСКАЗКА: Используйте команды nmap, connect, scan, cat или brute для решения задач.", "t-warning");
                     } else {
-                        printTerminal("Недостаточно XP для подсказки (требуется 10 XP).", "t-error");
+                        printTerminal("Недостаточно XP для подсказки (нужно 10 XP).", "t-error");
                     }
                     break;
 
@@ -1357,9 +1222,9 @@
             }
         }
 
-        /* RENDER LESSONS */
         function renderLessons() {
             var grid = document.getElementById("lessons-grid");
+            if (!grid) return;
             grid.innerHTML = "";
             for (var i = 0; i < lessonsData.length; i++) {
                 var l = lessonsData[i];
@@ -1386,48 +1251,50 @@
 
                 var btn = document.createElement("button");
                 btn.className = "action-btn " + (isCompleted ? "completed" : "");
-                btn.textContent = isCompleted ? "ПОВТОРИТЬ УРОК" "ИЗУЧИТЬ";
+                btn.textContent = isCompleted ? "ПОВТОРИТЬ УРОК" : "ИЗУЧИТЬ";
                 
-                // Using closure for lesson click
-                (function (lessonObj, completed) {
-                    btn.addEventListener("click", function () {
+                (function (lessonObj) {
+                    btn.onclick = function () {
                         openLessonModal(lessonObj);
-                    });
-                })(l, isCompleted);
+                    };
+                })(l);
 
                 card.appendChild(btn);
                 grid.appendChild(card);
             }
-            document.getElementById("lessons-count-nav").textContent = gameState.completedLessons.length;
+            var countNav = document.getElementById("lessons-count-nav");
+            if (countNav) countNav.textContent = gameState.completedLessons.length;
         }
 
-        /* OPEN LESSON MODAL */
         function openLessonModal(lesson) {
             var modal = document.getElementById("lesson-modal");
-            document.getElementById("lesson-modal-title").textContent = lesson.title;
-            
-            var contentDiv = document.getElementById("lesson-modal-content");
-            contentDiv.innerHTML = "";
+            var titleEl = document.getElementById("lesson-modal-title");
+            var contentEl = document.getElementById("lesson-modal-content");
+            if (!modal || !titleEl || !contentEl) return;
+
+            titleEl.textContent = lesson.title;
+            contentEl.innerHTML = "";
 
             var textP = document.createElement("p");
             textP.textContent = lesson.content;
-            contentDiv.appendChild(textP);
+            contentEl.appendChild(textP);
 
             var taskH = document.createElement("h4");
             taskH.textContent = "Практическое задание:";
-            contentDiv.appendChild(taskH);
+            contentEl.appendChild(taskH);
 
             var taskP = document.createElement("p");
             taskP.textContent = lesson.task;
-            contentDiv.appendChild(taskP);
+            contentEl.appendChild(taskP);
 
             var completeBtn = document.createElement("button");
             completeBtn.className = "action-btn";
             completeBtn.style.marginTop = "20px";
             completeBtn.style.width = "100%";
+            completeBtn.type = "button";
             completeBtn.textContent = "ЗАВЕРШИТЬ УРОК И ПОЛУЧИТЬ +" + lesson.xp + " XP";
             
-            completeBtn.addEventListener("click", function () {
+            completeBtn.onclick = function () {
                 var alreadyDone = false;
                 for (var i = 0; i < gameState.completedLessons.length; i++) {
                     if (gameState.completedLessons[i] === lesson.id) alreadyDone = true;
@@ -1442,15 +1309,15 @@
                     printTerminal("Урок пройден: " + lesson.title + " (+" + lesson.xp + " XP)", "t-success");
                 }
                 modal.style.display = "none";
-            });
+            };
 
-            contentDiv.appendChild(completeBtn);
+            contentEl.appendChild(completeBtn);
             modal.style.display = "flex";
         }
 
-        /* RENDER MISSIONS */
         function renderMissions() {
             var grid = document.getElementById("missions-grid");
+            if (!grid) return;
             grid.innerHTML = "";
             for (var i = 0; i < missionsData.length; i++) {
                 var m = missionsData[i];
@@ -1477,56 +1344,60 @@
 
                 var btn = document.createElement("button");
                 btn.className = "action-btn " + (isCompleted ? "completed" : "");
+                btn.type = "button";
                 btn.textContent = isCompleted ? "МИССИЯ ВЫПОЛНЕНА" : "ПЕРЕЙТИ В ТЕРМИНАЛ";
 
-                (function (missionObj, completed) {
-                    btn.addEventListener("click", function () {
-                        // Switch to terminal tab
-                        var tabBtns = document.querySelectorAll(".tab-btn");
-                        for (var t = 0; t < tabBtns.length; t++) {
-                            tabBtns[t].classList.remove("active");
-                        }
-                        tabBtns[0].classList.add("active");
+                btn.onclick = function () {
+                    var tabBtns = document.querySelectorAll(".tab-btn");
+                    for (var t = 0; t < tabBtns.length; t++) {
+                        tabBtns[t].classList.remove("active");
+                    }
+                    if (tabBtns[0]) tabBtns[0].classList.add("active");
 
-                        var panels = document.querySelectorAll(".view-panel");
-                        for (var p = 0; p < panels.length; p++) {
-                            panels[p].classList.remove("active");
-                        }
-                        document.getElementById("terminal-view").classList.add("active");
-                        document.getElementById("terminal-input").focus();
-                        printTerminal("Операция выбрана: " + missionObj.title + ". Введите команду в терминале.", "t-info");
-                    });
-                })(m, isCompleted);
+                    var panels = document.querySelectorAll(".view-panel");
+                    for (var p = 0; p < panels.length; p++) {
+                        panels[p].classList.remove("active");
+                    }
+                    var termView = document.getElementById("terminal-view");
+                    if (termView) termView.classList.add("active");
+                    
+                    var termInput = document.getElementById("terminal-input");
+                    if (termInput) termInput.focus();
+                };
 
                 card.appendChild(btn);
                 grid.appendChild(card);
             }
-            document.getElementById("missions-count-nav").textContent = gameState.completedMissions.length;
+            var countNav = document.getElementById("missions-count-nav");
+            if (countNav) countNav.textContent = gameState.completedMissions.length;
         }
 
-        function updateMissionsView() {
-            renderMissions();
-        }
-
-        /* UPDATE PROFILE VIEW & STATS */
         function updateHeaderStats() {
-            document.getElementById("header-lvl").textContent = gameState.lvl;
-            document.getElementById("header-xp").textContent = gameState.xp;
+            var lvlEl = document.getElementById("header-lvl");
+            var xpEl = document.getElementById("header-xp");
+            if (lvlEl) lvlEl.textContent = gameState.lvl;
+            if (xpEl) xpEl.textContent = gameState.xp;
         }
 
         function updateProfileView() {
-            document.getElementById("profile-lvl").textContent = gameState.lvl;
-            document.getElementById("profile-xp").textContent = gameState.xp;
+            var plvl = document.getElementById("profile-lvl");
+            var pxp = document.getElementById("profile-xp");
+            var pnext = document.getElementById("profile-next-xp");
+            var plessons = document.getElementById("profile-lessons");
+            var pmissions = document.getElementById("profile-missions");
+            if (plvl) plvl.textContent = gameState.lvl;
+            if (pxp) pxp.textContent = gameState.xp;
             var nextXP = gameState.lvl * 100;
-            document.getElementById("profile-next-xp").textContent = nextXP;
-            document.getElementById("profile-lessons").textContent = gameState.completedLessons.length;
-            document.getElementById("profile-missions").textContent = gameState.completedMissions.length;
+            if (pnext) pnext.textContent = nextXP;
+            if (plessons) plessons.textContent = gameState.completedLessons.length;
+            if (pmissions) pmissions.textContent = gameState.completedMissions.length;
 
             var percent = Math.min(100, Math.floor((gameState.xp / nextXP) * 100));
-            document.getElementById("profile-progress-fill").style.width = percent + "%";
+            var fill = document.getElementById("profile-progress-fill");
+            if (fill) fill.style.width = percent + "%";
 
-            // Render Achievements
             var achList = document.getElementById("achievements-list");
+            if (!achList) return;
             achList.innerHTML = "";
             for (var i = 0; i < achievementsDef.length; i++) {
                 var a = achievementsDef[i];
